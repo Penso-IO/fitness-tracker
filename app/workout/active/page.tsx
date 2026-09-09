@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import Timer from '@/components/Timer'
-import { Check, X, ChevronDown, ChevronUp, Lightbulb, StopCircle, Dumbbell, Loader2 } from 'lucide-react'
+import { Check, X, ChevronDown, ChevronUp, Lightbulb, BookOpen, StopCircle, Dumbbell, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ExerciseInfo } from '@/app/api/exercise/route'
 
@@ -15,6 +15,7 @@ export default function ActiveWorkoutPage() {
   const updateExerciseSet = useStore((s) => s.updateExerciseSet)
   const toggleSetComplete = useStore((s) => s.toggleSetComplete)
   const workoutTemplates = useStore((s) => s.workoutTemplates)
+  const customWorkouts = useStore((s) => s.customWorkouts)
 
   const [expandedExercise, setExpandedExercise] = useState<number>(0)
   const [timerKey, setTimerKey] = useState(0)
@@ -47,7 +48,9 @@ export default function ActiveWorkoutPage() {
 
   if (!activeSession) return null
 
-  const template = workoutTemplates.find((t) => t.id === activeSession.templateId)
+  const template = [...customWorkouts, ...workoutTemplates].find(
+    (t) => t.id === activeSession.templateId
+  )
 
   const completedSets = activeSession.exercises.flatMap((e) => e.sets).filter((s) => s.completed).length
   const totalSets = activeSession.exercises.flatMap((e) => e.sets).length
@@ -152,9 +155,16 @@ export default function ActiveWorkoutPage() {
                 <div className="px-4 pb-4 space-y-2 border-t border-[#1e1e2e] pt-3">
                   {/* Tip */}
                   {tplEx?.tips && (
-                    <div className="flex gap-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 p-3 mb-3">
+                    <div className="flex gap-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 p-3 mb-2">
                       <Lightbulb size={14} className="text-indigo-400 flex-shrink-0 mt-0.5" />
                       <p className="text-indigo-300 text-xs">{tplEx.tips}</p>
+                    </div>
+                  )}
+                  {/* Instructions */}
+                  {tplEx?.instructions && (
+                    <div className="flex gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3 mb-3">
+                      <BookOpen size={14} className="text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-emerald-300 text-xs leading-relaxed">{tplEx.instructions}</p>
                     </div>
                   )}
 

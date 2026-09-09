@@ -17,6 +17,7 @@ export interface Exercise {
   defaultReps: string // e.g. "8-10"
   restSeconds: number
   tips?: string
+  instructions?: string // step-by-step form cues
   fromBook?: string
 }
 
@@ -27,6 +28,7 @@ export interface WorkoutTemplate {
   exercises: Exercise[]
   estimatedMinutes: number
   description?: string
+  isCustom?: boolean
 }
 
 export interface PerformedSet {

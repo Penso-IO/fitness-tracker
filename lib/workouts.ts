@@ -17,6 +17,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultReps: '5+5',
         restSeconds: 90,
         tips: '5 rip gamba singola a 45kg → senza pausa 5 rip entrambe le gambe a 90kg',
+        instructions: 'Siediti con la schiena ben aderente allo schienale e i polpacci sotto il rullo. Estendi entrambe le gambe fino alla posizione completamente dritta stringendo i quadricipiti in cima. Mantieni 1 secondo di pausa in estensione massima. Scendi lentamente in 3 secondi. Non sollevare i glutei dal sedile durante il movimento.',
       },
       {
         id: 'gs-hack-squat',
@@ -26,6 +27,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultReps: '12',
         restSeconds: 120,
         tips: '60kg',
+        instructions: 'Posiziona i piedi alla larghezza delle spalle con punte leggermente aperte verso l\'esterno. Schiena sempre aderente allo schienale durante tutto il movimento. Scendi lentamente finché le cosce sono parallele alla pedana o più in basso. Spingi attraverso i talloni per risalire. Non bloccare le ginocchia in cima — mantieni una leggera tensione.',
       },
       {
         id: 'gs-affondi',
@@ -35,6 +37,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultReps: '12 (6/gamba)',
         restSeconds: 0,
         tips: '52kg. Dopo le prime 3 serie fai subito il blocco riscaldamento spalle (4ª serie senza blocco)',
+        instructions: 'Stai in piedi con i piedi alla larghezza dei fianchi. Fai un passo lungo in avanti con una gamba. Il ginocchio anteriore si flette fino a circa 90° — non deve superare la punta del piede. Il ginocchio posteriore scende verso il pavimento senza toccarlo. Mantieni il busto eretto e il core contratto. Torna alla posizione di partenza spingendo con il tallone del piede anteriore. Alterna le gambe.',
       },
       {
         id: 'gs-risc-spalle',
@@ -44,6 +47,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultReps: '8 × 5 esercizi',
         restSeconds: 90,
         tips: '8 rip × 8kg per ciascuno senza pausa: (1) alzate lat. a metà → (2) alzate lat. complete → (3) alzate frontali a metà → (4) alzate frontali complete → (5) rematore busto inclinato gambe unite',
+        instructions: 'Esegui tutti e 5 gli esercizi in sequenza senza pausa con gli stessi manubri (8kg). Mantieni i gomiti leggermente piegati in tutte le alzate. Movimento controllato e fluido — niente slancio. (1) Alzate laterali solo fino a metà ROM. (2) Alzate laterali complete fino all\'altezza delle spalle. (3) Alzate frontali a metà ROM. (4) Alzate frontali complete. (5) Busto inclinato a 45°, gambe unite, rematore con i gomiti verso l\'esterno.',
       },
       {
         id: 'gs-alzate-lat',
@@ -53,6 +57,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultReps: '6+5',
         restSeconds: 90,
         tips: '6 rip a 16kg poi dropset immediato 5 rip a 14kg',
+        instructions: 'Stai in piedi con i manubri ai lati. Inclina leggermente il busto in avanti (10–15°). Porta le braccia verso l\'esterno e in alto ruotando leggermente i polsi verso il basso (come versare un bicchiere — pollice verso il basso). Fermati quando le braccia sono all\'altezza delle spalle o appena oltre. Scendi lentamente in 3 secondi. Non usare la schiena per oscillare e non portare le braccia oltre i 90°.',
       },
       {
         id: 'gs-trazioni-larga',
@@ -61,6 +66,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultSets: 3,
         defaultReps: '5',
         restSeconds: 120,
+        instructions: 'Impugna la sbarra con presa pronata (palmi avanti) leggermente oltre la larghezza delle spalle. Inizia il movimento retraendo e abbassando le scapole — non con le braccia. Tira verso l\'alto portando il petto verso la sbarra. Scendi con controllo completo fino a quasi estensione delle braccia. Non iperestendere il collo — guarda leggermente verso l\'alto.',
       },
       {
         id: 'gs-trazioni-stretta',
@@ -69,6 +75,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultSets: 2,
         defaultReps: '8',
         restSeconds: 120,
+        instructions: 'Presa pronate o neutra alla larghezza delle spalle o più stretta. Tira verso l\'alto portando i gomiti verso i fianchi — questo attiva maggiormente il dorsale basso. Porta il mento sopra la sbarra. Massima contrazione del dorsale in cima. Scendi in modo controllato in 2–3 secondi.',
       },
     ],
   },
@@ -87,6 +94,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultReps: '10/6/10/10',
         restSeconds: 90,
         tips: 'Schema: 27kg×10 | 32kg×6 | 37kg×10 | 37kg×10',
+        instructions: 'Siediti sulla macchina e posiziona i gomiti sui cuscini — mantienili leggermente piegati per tutto il movimento. Porta le braccia verso il centro del corpo stringendo il petto in cima. Non sbattere le manopole insieme — fermati appena prima. Ritorna lentamente sentendo lo stretch nel petto. Non utilizzare la forza delle spalle per spingere.',
       },
       {
         id: 'pt-chest-press',
@@ -96,6 +104,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultReps: '13/8/8/8 + dropset',
         restSeconds: 90,
         tips: 'Set 1: 35kg×13 | Set 2: 40kg×8 + drop 35kg×5 | Set 3-4: 45kg×8 + drop 40kg×5',
+        instructions: 'Siediti con la schiena aderente allo schienale e il petto in fuori. Impugna le maniglie all\'altezza del petto con i gomiti leggermente al di sotto delle spalle. Spingi in avanti estendendo le braccia senza bloccare i gomiti in cima. Rientra lentamente — senti lo stretch nel petto. Mantieni le scapole retratte durante tutta l\'esecuzione.',
       },
       {
         id: 'pt-panca30-uniti',
@@ -105,6 +114,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultReps: '8 + dropset 5',
         restSeconds: 90,
         tips: '28kg × 8 rip poi dropset immediato 5 rip a 18kg. Manubri che si toccano per tutto il movimento.',
+        instructions: 'Imposta la panca a 30°. Sdraiati e tieni i manubri a contatto per tutta la durata del set — questo aumenta la tensione sul petto superiore. Abbassa i manubri verso il petto lateralmente in modo controllato in 3 secondi. Spingi verso l\'alto tenendo i manubri sempre in contatto. Focus sul petto clavicolare (fascia superiore).',
       },
       {
         id: 'pt-tri-overhead',
@@ -114,6 +124,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultReps: '8',
         restSeconds: 75,
         tips: '14kg. Manubrio tenuto verticale sopra la testa, gomiti fermi.',
+        instructions: 'Stai in piedi o siediti con la schiena eretta. Tieni il manubrio verticale sopra la testa con entrambe le mani avvolte attorno al piatto superiore. Gomiti puntati verso il soffitto — non si devono aprire lateralmente. Abbassa il manubrio dietro la testa flettendo solo i gomiti (non muovere le braccia superiori). Estendi completamente in cima stringendo il tricipite.',
       },
       {
         id: 'pt-tri-cavi',
@@ -123,6 +134,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultReps: '10',
         restSeconds: 75,
         tips: 'Schema: 45kg×10 | 50kg×10 | 55kg×10 | 55kg×10',
+        instructions: 'Stai in piedi di fronte alla macchina con i piedi alla larghezza delle spalle. Impugna la corda o la barra alta. Tieni i gomiti fissi e aderenti ai fianchi per tutto il movimento — sono il fulcro. Estendi i gomiti verso il basso fino a quando le braccia sono completamente tese. Stringi il tricipite in basso per 1 secondo. Rientra lentamente controllando il peso.',
       },
       {
         id: 'pt-dips',
@@ -131,6 +143,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultSets: 4,
         defaultReps: '8',
         restSeconds: 90,
+        instructions: 'Impugna le parallele e partenza con gomiti distesi. Per focus sui tricipiti: mantieni il busto più eretto possibile con i gomiti vicini ai fianchi. Abbassati piegando i gomiti fino a circa 90°. Spingi sui palmi per risalire ed estendi completamente le braccia in cima. Per coinvolgere più petto: inclina il busto in avanti.',
       },
       {
         id: 'pt-addominali',
@@ -140,6 +153,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultReps: '20 + 20',
         restSeconds: 60,
         tips: '20 addominali / 45 sec esercizi core, poi 20 flessioni',
+        instructions: 'Crunch: sdraiato, ginocchia piegate, mani dietro la testa (senza tirare il collo). Solleva solo le spalle dal pavimento. Espira in cima e tieni 1 secondo. Core (45s): plank, mountain climbers o leg raise alternati. Flessioni: mani alla larghezza delle spalle, corpo in linea retta dalla testa ai talloni. Abbassa il petto a 5cm dal suolo.',
       },
     ],
   },
@@ -158,6 +172,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultReps: '8 + dropset 5',
         restSeconds: 90,
         tips: 'Set 1: 45kg×8 + drop 35kg×5 | Set 2: 50kg×8 + drop 35kg×5 | Set 3-4: 55kg×8 + drop 35kg×5',
+        instructions: 'Siediti con i piedi sulla piattaforma, ginocchia leggermente piegate. Schiena eretta — non curvarti per raggiungere la manopola. Tira verso l\'ombelico portando i gomiti indietro e mantenendo le scapole retratte in cima. Espira tirando, inspira rilasciando. Ritorna lentamente alla posizione di partenza allungando le braccia senza curvare la schiena.',
       },
       {
         id: 'dt-lat-larga',
@@ -167,6 +182,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultReps: '8 + dropset 5',
         restSeconds: 90,
         tips: 'Set 1-2: 65kg×8 + drop 45kg×5 | Set 3: 70kg×8 + drop 50kg×5',
+        instructions: 'Siediti con le ginocchia bloccate sotto il pad. Presa pronata (palmi avanti) più larga delle spalle. Porta la sbarra verso il petto superiore (non dietro la testa). Inizia il movimento abbassando e retraendo le scapole — poi fletti i gomiti. Tira con i gomiti verso il basso e verso i fianchi. Risali lentamente in 3 secondi. Evita di oscillare il busto.',
       },
       {
         id: 'dt-lat-stretta',
@@ -176,6 +192,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultReps: '8 + dropset 5',
         restSeconds: 90,
         tips: '60kg×8 poi dropset 5 rip a 45kg',
+        instructions: 'Usa la manopola a triangolo (presa neutra, palmi affrontati). Con la presa stretta si attiva maggiormente il dorsale basso e il grande rotondo. Porta il triangolo verso l\'addome superiore mantenendo i gomiti vicini al busto. Scapole retratte e depresse in cima. Risali lentamente con controllo completo.',
       },
       {
         id: 'dt-upper-back',
@@ -185,6 +202,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultReps: '8',
         restSeconds: 90,
         tips: '40kg',
+        instructions: 'Impostazione simile al rematore ma con focus sulla parte alta della schiena (trapezio medio, romboidi, infraspinato). Tieni i gomiti più alti durante il tiro — portali all\'altezza delle spalle. Spremi bene le scapole insieme in cima mantenendo 1 secondo di contrazione. Questo esercizio è fondamentale per la salute della spalla e la postura. Movimento controllato, no slancio.',
       },
       {
         id: 'dt-trazioni-larga',
@@ -193,6 +211,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultSets: 3,
         defaultReps: '5',
         restSeconds: 120,
+        instructions: 'Impugna la sbarra con presa pronata (palmi avanti) leggermente oltre la larghezza delle spalle. Inizia il movimento retraendo e abbassando le scapole — non con le braccia. Tira verso l\'alto portando il petto verso la sbarra. Scendi con controllo completo fino a quasi estensione delle braccia. Non iperestendere il collo — guarda leggermente verso l\'alto.',
       },
       {
         id: 'dt-trazioni-stretta',
@@ -201,6 +220,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultSets: 2,
         defaultReps: '8',
         restSeconds: 120,
+        instructions: 'Presa pronate o neutra alla larghezza delle spalle o più stretta. Tira verso l\'alto portando i gomiti verso i fianchi — questo attiva maggiormente il dorsale basso. Porta il mento sopra la sbarra. Massima contrazione del dorsale in cima. Scendi in modo controllato in 2–3 secondi.',
       },
       {
         id: 'dt-dips',
@@ -209,6 +229,7 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
         defaultSets: 4,
         defaultReps: '8',
         restSeconds: 90,
+        instructions: 'Impugna le parallele e partenza con gomiti distesi. Per focus sui tricipiti: mantieni il busto più eretto possibile con i gomiti vicini ai fianchi. Abbassati piegando i gomiti fino a circa 90°. Spingi sui palmi per risalire ed estendi completamente le braccia in cima.',
       },
     ],
   },
@@ -534,3 +555,9 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
 
 // Placeholder per i consigli dai libri — da completare con l'input dell'utente
 export const BOOK_WORKOUTS: WorkoutTemplate[] = []
+
+// Le 3 schede personali pre-caricate come custom (incluse quelle 3 proposte)
+export const INITIAL_CUSTOM_WORKOUTS: WorkoutTemplate[] = DEFAULT_WORKOUTS.slice(0, 3).map((t) => ({
+  ...t,
+  isCustom: true,
+}))

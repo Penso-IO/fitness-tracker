@@ -2,7 +2,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { WorkoutSession, NutritionEntry, ProgressEntry, WorkoutTemplate, BookTip } from '@/types'
-import { DEFAULT_WORKOUTS } from './workouts'
+import { DEFAULT_WORKOUTS, INITIAL_CUSTOM_WORKOUTS } from './workouts'
 import { generateId, todayStr } from './utils'
 
 export const NUTRITION_TARGETS = {
@@ -37,6 +37,12 @@ interface AppState {
   workoutTemplates: WorkoutTemplate[]
   addWorkoutTemplate: (template: WorkoutTemplate) => void
   removeWorkoutTemplate: (id: string) => void
+
+  // Custom schede (max 5, user-created)
+  customWorkouts: WorkoutTemplate[]
+  addCustomWorkout: (template: WorkoutTemplate) => void
+  updateCustomWorkout: (id: string, template: WorkoutTemplate) => void
+  removeCustomWorkout: (id: string) => void
 
   // Active session
   activeSession: WorkoutSession | null
@@ -77,6 +83,22 @@ export const useStore = create<AppState>()(
 
       removeWorkoutTemplate: (id) =>
         set((s) => ({ workoutTemplates: s.workoutTemplates.filter((t) => t.id !== id) })),
+
+      customWorkouts: INITIAL_CUSTOM_WORKOUTS,
+
+      addCustomWorkout: (template) =>
+        set((s) => {
+          if (s.customWorkouts.length >= 5) return s
+          return { customWorkouts: [...s.customWorkouts, template] }
+        }),
+
+      updateCustomWorkout: (id, template) =>
+        set((s) => ({
+          customWorkouts: s.customWorkouts.map((t) => (t.id === id ? template : t)),
+        })),
+
+      removeCustomWorkout: (id) =>
+        set((s) => ({ customWorkouts: s.customWorkouts.filter((t) => t.id !== id) })),
 
       activeSession: null,
 
