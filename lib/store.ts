@@ -198,6 +198,17 @@ export const useStore = create<AppState>()(
       deleteBookTip: (id) =>
         set((s) => ({ bookTips: s.bookTips.filter((t) => t.id !== id) })),
     }),
-    { name: 'fitness-tracker-store' }
+    {
+      name: 'fitness-tracker-store',
+      version: 2,
+      migrate: (persistedState: unknown, version: number) => {
+        const state = persistedState as Partial<AppState>
+        if (version < 2) {
+          // v2: reset customWorkouts to 4 schede (Palestra schede)
+          return { ...state, customWorkouts: INITIAL_CUSTOM_WORKOUTS }
+        }
+        return state as AppState
+      },
+    }
   )
 )

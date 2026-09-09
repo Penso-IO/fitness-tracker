@@ -4,8 +4,9 @@ import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import { WorkoutTemplate } from '@/types'
 import { getMuscleColor, getMuscleEmoji, todayStr } from '@/lib/utils'
-import { Clock, ChevronRight, Calendar, Plus, Pencil, Trash2, Lock } from 'lucide-react'
+import { Clock, ChevronRight, Calendar, Plus, Pencil, Trash2, Lock, ChevronDown, ChevronUp, Dumbbell } from 'lucide-react'
 import CustomWorkoutEditor from '@/components/CustomWorkoutEditor'
+import ExerciseInfoModal from '@/components/ExerciseInfoModal'
 
 function TemplateCard({
   template,
@@ -13,19 +14,22 @@ function TemplateCard({
   onEdit,
   onDelete,
   disabled,
+  onExerciseDemo,
 }: {
   template: WorkoutTemplate
   onStart: () => void
   onEdit?: () => void
   onDelete?: () => void
   disabled: boolean
+  onExerciseDemo: (name: string) => void
 }) {
+  const [expanded, setExpanded] = useState(false)
   const isCustom = !!onEdit
 
   return (
-    <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4 hover:border-indigo-500/20 transition-all">
-      <div className="flex items-start gap-2">
-        {/* Clickable content area */}
+    <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] hover:border-indigo-500/20 transition-all overflow-hidden">
+      {/* Card header */}
+      <div className="flex items-start gap-2 p-4">
         <button
           onClick={onStart}
           disabled={disabled}
@@ -40,10 +44,7 @@ function TemplateCard({
           )}
           <div className="flex flex-wrap gap-1.5 mb-2">
             {template.muscleGroups.map((m) => (
-              <span
-                key={m}
-                className={`rounded-full border px-2 py-0.5 text-xs font-medium ${getMuscleColor(m)}`}
-              >
+              <span key={m} className={`rounded-full border px-2 py-0.5 text-xs font-medium ${getMuscleColor(m)}`}>
                 {m}
               </span>
             ))}
@@ -60,32 +61,65 @@ function TemplateCard({
         <div className="flex flex-col items-center gap-1 flex-shrink-0">
           {isCustom ? (
             <>
-              <button
-                onClick={onEdit}
-                className="p-2 rounded-lg text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
-                title="Modifica"
-              >
+              <button onClick={onEdit} className="p-2 rounded-lg text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors" title="Modifica">
                 <Pencil size={14} />
               </button>
-              <button
-                onClick={onDelete}
-                className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                title="Elimina"
-              >
+              <button onClick={onDelete} className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors" title="Elimina">
                 <Trash2 size={14} />
               </button>
             </>
           ) : (
-            <button
-              onClick={onStart}
-              disabled={disabled}
-              className="p-2 text-slate-600 disabled:opacity-40"
-            >
+            <button onClick={onStart} disabled={disabled} className="p-2 text-slate-600 disabled:opacity-40">
               <ChevronRight size={20} />
             </button>
           )}
         </div>
       </div>
+
+      {/* Toggle exercise list */}
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className="w-full flex items-center justify-between px-4 py-2 border-t border-[#1e1e2e] text-slate-500 hover:text-slate-300 hover:bg-white/[0.02] transition-colors"
+      >
+        <span className="text-xs">Vedi esercizi</span>
+        {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+      </button>
+
+      {/* Exercise list */}
+      {expanded && (
+        <div className="border-t border-[#1e1e2e] divide-y divide-[#1e1e2e]">
+          {template.exercises.map((ex) => (
+            <div key={ex.id} className="flex items-center gap-3 px-4 py-2.5">
+              <div className="flex-1 min-w-0">
+                <p className="text-white text-sm font-medium truncate">{ex.name}</p>
+                <p className="text-slate-500 text-xs">
+                  {ex.defaultSets}×{ex.defaultReps}
+                  {ex.restSeconds > 0 && ` · ${ex.restSeconds}s rec.`}
+                </p>
+                {ex.tips && <p className="text-indigo-400 text-xs mt-0.5 truncate">{ex.tips}</p>}
+              </div>
+              <button
+                onClick={() => onExerciseDemo(ex.name)}
+                className="flex items-center gap-1 rounded-lg border border-[#2d2d3a] px-2 py-1 text-xs text-slate-500 hover:text-indigo-400 hover:border-indigo-500/30 transition-colors flex-shrink-0"
+              >
+                <Dumbbell size={11} />
+                Demo
+              </button>
+            </div>
+          ))}
+
+          {/* Start from expanded view */}
+          <div className="px-4 py-3">
+            <button
+              onClick={onStart}
+              disabled={disabled}
+              className="w-full rounded-xl bg-indigo-600 py-2.5 text-white text-sm font-semibold hover:bg-indigo-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Inizia sessione →
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -103,6 +137,7 @@ export default function WorkoutPage() {
   const [selectedDate, setSelectedDate] = useState(todayStr())
   const [editorOpen, setEditorOpen] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState<WorkoutTemplate | undefined>()
+  const [demoExercise, setDemoExercise] = useState<string | null>(null)
 
   // Library: default templates not already in custom workouts
   const customIds = new Set(customWorkouts.map((c) => c.id))
@@ -206,6 +241,7 @@ export default function WorkoutPage() {
                 onEdit={() => openEdit(t)}
                 onDelete={() => removeCustomWorkout(t.id)}
                 disabled={!!activeSession}
+                onExerciseDemo={setDemoExercise}
               />
             ))}
           </div>
@@ -226,12 +262,13 @@ export default function WorkoutPage() {
               template={t}
               onStart={() => handleStart(t)}
               disabled={!!activeSession}
+              onExerciseDemo={setDemoExercise}
             />
           ))}
         </div>
       </section>
 
-      {/* Custom Workout Editor modal */}
+      {/* Custom Workout Editor */}
       {editorOpen && (
         <CustomWorkoutEditor
           initial={editingTemplate}
@@ -241,6 +278,11 @@ export default function WorkoutPage() {
             setEditingTemplate(undefined)
           }}
         />
+      )}
+
+      {/* Exercise Demo modal (wger.de API) */}
+      {demoExercise && (
+        <ExerciseInfoModal exerciseName={demoExercise} onClose={() => setDemoExercise(null)} />
       )}
     </div>
   )

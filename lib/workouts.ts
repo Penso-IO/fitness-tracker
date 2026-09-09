@@ -556,8 +556,8 @@ export const DEFAULT_WORKOUTS: WorkoutTemplate[] = [
 // Placeholder per i consigli dai libri — da completare con l'input dell'utente
 export const BOOK_WORKOUTS: WorkoutTemplate[] = []
 
-// Le 3 schede personali pre-caricate come custom (incluse quelle 3 proposte)
-export const INITIAL_CUSTOM_WORKOUTS: WorkoutTemplate[] = DEFAULT_WORKOUTS.slice(0, 3).map((t) => ({
+// Le 4 schede personali pre-caricate come custom (Palestra schede)
+export const INITIAL_CUSTOM_WORKOUTS: WorkoutTemplate[] = DEFAULT_WORKOUTS.slice(0, 4).map((t) => ({
   ...t,
   isCustom: true,
 }))

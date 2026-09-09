@@ -3,9 +3,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import Timer from '@/components/Timer'
-import { Check, X, ChevronDown, ChevronUp, Lightbulb, BookOpen, StopCircle, Dumbbell, Loader2 } from 'lucide-react'
+import { Check, X, ChevronDown, ChevronUp, Lightbulb, BookOpen, StopCircle, Dumbbell } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { ExerciseInfo } from '@/app/api/exercise/route'
+import ExerciseInfoModal from '@/components/ExerciseInfoModal'
 
 export default function ActiveWorkoutPage() {
   const router = useRouter()
@@ -24,22 +24,9 @@ export default function ActiveWorkoutPage() {
   const [notes, setNotes] = useState('')
   const [confirming, setConfirming] = useState(false)
   const [exerciseModal, setExerciseModal] = useState<string | null>(null)
-  const [exerciseData, setExerciseData] = useState<ExerciseInfo | null>(null)
-  const [exerciseLoading, setExerciseLoading] = useState(false)
 
-  const openExerciseModal = useCallback(async (name: string) => {
+  const openExerciseModal = useCallback((name: string) => {
     setExerciseModal(name)
-    setExerciseData(null)
-    setExerciseLoading(true)
-    try {
-      const res = await fetch(`/api/exercise?name=${encodeURIComponent(name)}`)
-      const data: ExerciseInfo | null = await res.json()
-      setExerciseData(data)
-    } catch {
-      setExerciseData(null)
-    } finally {
-      setExerciseLoading(false)
-    }
   }, [])
 
   useEffect(() => {
@@ -264,89 +251,9 @@ export default function ActiveWorkoutPage() {
         Termina sessione
       </button>
 
-      {/* Exercise Info Modal (wger.de) */}
+      {/* Exercise Info Modal */}
       {exerciseModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm"
-          onClick={() => setExerciseModal(null)}
-        >
-          <div
-            className="w-full max-w-lg rounded-t-3xl bg-[#111118] border-t border-x border-[#1e1e2e] max-h-[85vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-              <div className="h-1 w-10 rounded-full bg-[#2d2d3a]" />
-            </div>
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#1e1e2e] flex-shrink-0">
-              <h3 className="text-white font-bold text-base truncate pr-4">{exerciseModal}</h3>
-              <button onClick={() => setExerciseModal(null)} className="text-slate-500 hover:text-white p-1 flex-shrink-0">
-                <X size={18} />
-              </button>
-            </div>
-            <div className="overflow-y-auto flex-1 p-4 space-y-4">
-              {exerciseLoading && (
-                <div className="flex flex-col items-center justify-center py-12 gap-3">
-                  <Loader2 size={28} className="text-indigo-400 animate-spin" />
-                  <p className="text-slate-500 text-sm">Caricamento dati esercizio...</p>
-                </div>
-              )}
-              {!exerciseLoading && exerciseData && (
-                <>
-                  <div className="flex flex-wrap gap-2">
-                    {exerciseData.category && (
-                      <span className="rounded-full bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 text-xs font-medium text-indigo-400">
-                        {exerciseData.category}
-                      </span>
-                    )}
-                    {exerciseData.muscles.map((m) => (
-                      <span key={m} className="rounded-full bg-orange-500/10 border border-orange-500/20 px-3 py-1 text-xs text-orange-400">
-                        {m}
-                      </span>
-                    ))}
-                    {exerciseData.musclesSecondary.map((m) => (
-                      <span key={m} className="rounded-full bg-[#1e1e2e] border border-[#2d2d3a] px-3 py-1 text-xs text-slate-400">
-                        {m}
-                      </span>
-                    ))}
-                  </div>
-                  {exerciseData.images.length > 0 && (
-                    <div className="flex gap-3 overflow-x-auto pb-1">
-                      {exerciseData.images.slice(0, 3).map((img, i) => (
-                        <img
-                          key={i}
-                          src={img}
-                          alt={exerciseData.name}
-                          className="h-44 w-auto rounded-xl flex-shrink-0 bg-white object-contain"
-                        />
-                      ))}
-                    </div>
-                  )}
-                  {exerciseData.description && (
-                    <div className="rounded-xl bg-[#0a0a0f] border border-[#1e1e2e] p-3">
-                      <p className="text-slate-400 text-sm leading-relaxed">{exerciseData.description}</p>
-                    </div>
-                  )}
-                  {exerciseData.equipment.length > 0 && (
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs text-slate-500">Attrezzatura:</span>
-                      {exerciseData.equipment.map((eq) => (
-                        <span key={eq} className="rounded-lg bg-[#1e1e2e] border border-[#2d2d3a] px-2 py-1 text-xs text-slate-400">
-                          {eq}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </>
-              )}
-              {!exerciseLoading && !exerciseData && (
-                <div className="flex flex-col items-center justify-center py-12 gap-3 text-slate-600">
-                  <Dumbbell size={40} strokeWidth={1} />
-                  <p className="text-sm">Nessuna demo disponibile per questo esercizio</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <ExerciseInfoModal exerciseName={exerciseModal} onClose={() => setExerciseModal(null)} />
       )}
 
       {/* Confirm cancel modal */}
