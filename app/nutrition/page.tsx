@@ -4,6 +4,7 @@ import { useStore } from '@/lib/store'
 import { NUTRITION_TARGETS } from '@/lib/store'
 import { formatDate, todayStr } from '@/lib/utils'
 import { Plus, Trash2, Droplets, Flame, ChevronDown, ChevronUp, BookOpen, Target, Zap, ChefHat } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
 // ── Meal plan reference (from ClickUp) ────────────────────────────
 const MEALS = [
@@ -446,8 +447,9 @@ export default function NutritionPage() {
   const nutritionLog = useStore((s) => s.nutritionLog)
   const addNutritionEntry = useStore((s) => s.addNutritionEntry)
   const deleteNutritionEntry = useStore((s) => s.deleteNutritionEntry)
+  const updateNutritionEntry = useStore((s) => s.updateNutritionEntry)
 
-  const [tab, setTab] = useState<'diario' | 'ricette'>('diario')
+  const [tab, setTab] = useState<'diario' | 'settimana' | 'ricette'>('diario')
   const [showForm, setShowForm] = useState(false)
   const [showPlan, setShowPlan] = useState(false)
   const [recipeCat, setRecipeCat] = useState<RecipeCategory | 'tutti'>('tutti')
@@ -455,6 +457,28 @@ export default function NutritionPage() {
 
   const today = todayStr()
   const todayEntry = nutritionLog.find((n) => n.date === today)
+  const waterToday = todayEntry?.water ?? 0
+
+  const addWater = (liters: number) => {
+    if (todayEntry) {
+      updateNutritionEntry(todayEntry.id, { water: +(todayEntry.water + liters).toFixed(3) })
+    } else {
+      addNutritionEntry({ date: today, calories: 0, protein: 0, carbs: 0, fat: 0, water: liters })
+    }
+  }
+
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() - (6 - i))
+    const dateStr = d.toISOString().slice(0, 10)
+    const entry = nutritionLog.find((n) => n.date === dateStr)
+    return {
+      date: dateStr.slice(5).replace('-', '/'),
+      kcal: entry?.calories ?? 0,
+      prot: entry?.protein ?? 0,
+      acqua: entry ? Math.round(entry.water * 1000) : 0,
+    }
+  })
 
   const handleAdd = () => {
     if (!form.calories) return
@@ -495,7 +519,7 @@ export default function NutritionPage() {
 
       {/* Tab navigation */}
       <div className="flex rounded-xl bg-[#111118] border border-[#1e1e2e] p-1 gap-1">
-        {([['diario', 'Diario'], ['ricette', 'Ricette']] as const).map(([key, label]) => (
+        {([['diario', 'Diario'], ['settimana', '7 Giorni'], ['ricette', 'Ricette']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setTab(key)}
@@ -513,6 +537,50 @@ export default function NutritionPage() {
       {/* ── DIARIO TAB ─────────────────────────────────────────── */}
       {tab === 'diario' && (
         <>
+          {/* Water Tracker */}
+          <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Droplets size={16} className="text-cyan-400" />
+                <span className="text-sm font-semibold text-white">Acqua</span>
+              </div>
+              <span className="text-cyan-400 font-bold text-base">
+                {(waterToday * 1000).toFixed(0)}ml
+              </span>
+            </div>
+            <div>
+              <div className="flex justify-between text-xs text-slate-500 mb-1.5">
+                <span>{(waterToday * 1000).toFixed(0)} ml bevuti</span>
+                <span>{NUTRITION_TARGETS.water * 1000} ml target</span>
+              </div>
+              <div className="h-3 rounded-full bg-[#1e1e2e] overflow-hidden">
+                <div
+                  className="h-3 rounded-full bg-gradient-to-r from-cyan-600 to-cyan-400 transition-all duration-500"
+                  style={{ width: `${Math.min(100, (waterToday / NUTRITION_TARGETS.water) * 100)}%` }}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {([
+                { label: '+100ml', value: 0.1 },
+                { label: '+250ml', value: 0.25 },
+                { label: '+330ml', value: 0.33 },
+                { label: '+500ml', value: 0.5 },
+              ] as const).map(({ label, value }) => (
+                <button
+                  key={label}
+                  onClick={() => addWater(value)}
+                  className="rounded-xl bg-cyan-500/10 border border-cyan-500/20 py-2.5 text-xs font-semibold text-cyan-400 hover:bg-cyan-500/20 active:scale-95 transition-all"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {waterToday >= NUTRITION_TARGETS.water && (
+              <p className="text-center text-xs text-cyan-400 font-medium">🎯 Target raggiunto!</p>
+            )}
+          </div>
+
           {/* Today progress */}
           {todayEntry && (
             <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4 space-y-3">
@@ -677,6 +745,88 @@ export default function NutritionPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* ── SETTIMANA TAB ──────────────────────────────────────── */}
+      {tab === 'settimana' && (
+        <div className="space-y-4">
+          {/* Calorie chart */}
+          <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4">
+            <h2 className="text-sm font-semibold text-slate-400 mb-1">Calorie — ultimi 7 giorni</h2>
+            <p className="text-xs text-slate-600 mb-3">Target: {NUTRITION_TARGETS.calories} kcal/giorno</p>
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart data={last7Days} barSize={24}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" vertical={false} />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
+                <Tooltip
+                  contentStyle={{ background: '#111118', border: '1px solid #1e1e2e', borderRadius: 8, color: '#e2e8f0', fontSize: 12 }}
+                  formatter={(v) => [`${v} kcal`, 'Calorie']}
+                />
+                <Bar dataKey="kcal" fill="#f97316" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Protein chart */}
+          <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4">
+            <h2 className="text-sm font-semibold text-slate-400 mb-1">Proteine — ultimi 7 giorni</h2>
+            <p className="text-xs text-slate-600 mb-3">Target: {NUTRITION_TARGETS.protein}g/giorno</p>
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart data={last7Days} barSize={24}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" vertical={false} />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
+                <Tooltip
+                  contentStyle={{ background: '#111118', border: '1px solid #1e1e2e', borderRadius: 8, color: '#e2e8f0', fontSize: 12 }}
+                  formatter={(v) => [`${v}g`, 'Proteine']}
+                />
+                <Bar dataKey="prot" fill="#60a5fa" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Water chart */}
+          <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4">
+            <h2 className="text-sm font-semibold text-slate-400 mb-1">Acqua — ultimi 7 giorni</h2>
+            <p className="text-xs text-slate-600 mb-3">Target: {NUTRITION_TARGETS.water * 1000}ml/giorno</p>
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart data={last7Days} barSize={24}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" vertical={false} />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
+                <Tooltip
+                  contentStyle={{ background: '#111118', border: '1px solid #1e1e2e', borderRadius: 8, color: '#e2e8f0', fontSize: 12 }}
+                  formatter={(v) => [`${v}ml`, 'Acqua']}
+                />
+                <Bar dataKey="acqua" fill="#22d3ee" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Summary stats */}
+          <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4">
+            <h2 className="text-sm font-semibold text-slate-400 mb-3">Media settimana</h2>
+            <div className="grid grid-cols-3 gap-3">
+              {(() => {
+                const filled = last7Days.filter(d => d.kcal > 0)
+                const avgKcal = filled.length ? Math.round(filled.reduce((s, d) => s + d.kcal, 0) / filled.length) : 0
+                const avgProt = filled.length ? Math.round(filled.reduce((s, d) => s + d.prot, 0) / filled.length) : 0
+                const avgAcqua = filled.length ? Math.round(filled.reduce((s, d) => s + d.acqua, 0) / filled.length) : 0
+                return [
+                  { label: 'Kcal/die', value: avgKcal, unit: '', color: 'text-orange-400' },
+                  { label: 'Prot/die', value: avgProt, unit: 'g', color: 'text-blue-400' },
+                  { label: 'Acqua/die', value: avgAcqua, unit: 'ml', color: 'text-cyan-400' },
+                ].map(m => (
+                  <div key={m.label} className="text-center rounded-xl bg-[#0a0a0f] py-3">
+                    <p className={`text-lg font-bold ${m.color}`}>{m.value}{m.unit}</p>
+                    <p className="text-slate-600 text-xs mt-0.5">{m.label}</p>
+                  </div>
+                ))
+              })()}
+            </div>
+          </div>
+        </div>
       )}
 
       {/* ── RICETTE TAB ────────────────────────────────────────── */}

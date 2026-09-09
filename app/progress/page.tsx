@@ -1,17 +1,49 @@
 'use client'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useStore } from '@/lib/store'
 import { formatDate, todayStr } from '@/lib/utils'
-import { Plus, Trash2, TrendingUp } from 'lucide-react'
+import { Plus, Trash2, TrendingUp, Dumbbell, ChevronDown } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
 export default function ProgressPage() {
   const progressLog = useStore((s) => s.progressLog)
   const addProgressEntry = useStore((s) => s.addProgressEntry)
   const deleteProgressEntry = useStore((s) => s.deleteProgressEntry)
+  const sessions = useStore((s) => s.sessions)
 
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ date: todayStr(), weight: '', bodyFat: '', chest: '', waist: '', hips: '', notes: '' })
+  const [selectedExercise, setSelectedExercise] = useState<string>('')
+
+  const exerciseNames = useMemo(() => {
+    const names = new Set<string>()
+    sessions.forEach((s) => s.exercises.forEach((e) => names.add(e.exerciseName)))
+    return Array.from(names).sort()
+  }, [sessions])
+
+  const exerciseProgressData = useMemo(() => {
+    if (!selectedExercise) return []
+    const byDate = new Map<string, { maxWeight: number; volume: number }>()
+    sessions.forEach((session) => {
+      const ex = session.exercises.find((e) => e.exerciseName === selectedExercise)
+      if (!ex) return
+      const completedSets = ex.sets.filter((s) => s.completed && s.weight > 0)
+      if (completedSets.length === 0) return
+      const maxWeight = Math.max(...completedSets.map((s) => s.weight))
+      const volume = completedSets.reduce((sum, s) => sum + s.weight * s.reps, 0)
+      const existing = byDate.get(session.date)
+      if (!existing || maxWeight > existing.maxWeight) {
+        byDate.set(session.date, { maxWeight, volume })
+      }
+    })
+    return Array.from(byDate.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, { maxWeight, volume }]) => ({
+        date: date.slice(5),
+        'Peso max': maxWeight,
+        Volume: Math.round(volume),
+      }))
+  }, [sessions, selectedExercise])
 
   const handleAdd = () => {
     addProgressEntry({
@@ -78,6 +110,62 @@ export default function ProgressPage() {
               <Line type="monotone" dataKey="peso" stroke="#6366f1" strokeWidth={2} dot={{ fill: '#6366f1', r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Exercise progression */}
+      {exerciseNames.length > 0 && (
+        <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Dumbbell size={16} className="text-indigo-400" />
+            <h2 className="text-sm font-semibold text-slate-400">Progressione esercizi</h2>
+          </div>
+          <div className="relative">
+            <select
+              value={selectedExercise}
+              onChange={(e) => setSelectedExercise(e.target.value)}
+              className="w-full appearance-none rounded-xl bg-[#0a0a0f] border border-[#2d2d3a] px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500 pr-8"
+            >
+              <option value="">Seleziona esercizio...</option>
+              {exerciseNames.map((name) => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+          </div>
+
+          {selectedExercise && exerciseProgressData.length > 0 && (
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs text-slate-500 mb-2">Peso massimo (kg)</p>
+                <ResponsiveContainer width="100%" height={130}>
+                  <LineChart data={exerciseProgressData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" />
+                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} domain={['auto', 'auto']} />
+                    <Tooltip contentStyle={{ background: '#111118', border: '1px solid #1e1e2e', borderRadius: 8, color: '#e2e8f0' }} />
+                    <Line type="monotone" dataKey="Peso max" stroke="#6366f1" strokeWidth={2} dot={{ fill: '#6366f1', r: 3 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 mb-2">Volume totale (kg×rip)</p>
+                <ResponsiveContainer width="100%" height={130}>
+                  <LineChart data={exerciseProgressData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" />
+                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} domain={['auto', 'auto']} />
+                    <Tooltip contentStyle={{ background: '#111118', border: '1px solid #1e1e2e', borderRadius: 8, color: '#e2e8f0' }} />
+                    <Line type="monotone" dataKey="Volume" stroke="#f97316" strokeWidth={2} dot={{ fill: '#f97316', r: 3 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+
+          {selectedExercise && exerciseProgressData.length === 0 && (
+            <p className="text-slate-600 text-xs text-center py-4">Nessun dato completato per questo esercizio</p>
+          )}
         </div>
       )}
 
