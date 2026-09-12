@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import Timer from '@/components/Timer'
 import { Check, X, ChevronDown, ChevronUp, Lightbulb, BookOpen, StopCircle, Dumbbell } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import ExerciseInfoModal from '@/components/ExerciseInfoModal'
 
 export default function ActiveWorkoutPage() {
@@ -54,46 +53,45 @@ export default function ActiveWorkoutPage() {
   }
 
   return (
-    <div className="px-4 pt-6 pb-4 space-y-4">
+    <div style={{ paddingBottom: 26 }}>
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div style={{ padding: '58px 20px 14px', borderBottom: '2px solid rgba(32,30,29,0.4)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
-          <h1 className="text-xl font-bold text-white">{activeSession.templateName}</h1>
-          <p className="text-slate-500 text-sm">{activeSession.date}</p>
+          <h1 style={{ fontSize: 22, marginBottom: 2 }}>{activeSession.templateName}</h1>
+          <div className="k">{activeSession.date}</div>
         </div>
-        <button onClick={() => setConfirming(true)} className="rounded-xl border border-red-500/30 p-2 text-red-400 hover:bg-red-500/10">
+        <button
+          onClick={() => setConfirming(true)}
+          style={{ border: '1px solid var(--divider)', padding: 8, color: 'var(--accent)', background: 'none', cursor: 'pointer' }}
+        >
           <X size={18} />
         </button>
       </div>
 
       {/* Progress bar */}
-      <div>
-        <div className="flex justify-between text-xs text-slate-500 mb-1">
-          <span>{completedSets}/{totalSets} serie completate</span>
-          <span>{Math.round(progress)}%</span>
+      <div style={{ padding: '12px 20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+          <span className="k">{completedSets}/{totalSets} serie completate</span>
+          <span className="k">{Math.round(progress)}%</span>
         </div>
-        <div className="h-2 rounded-full bg-[#1e1e2e]">
+        <div style={{ height: 6, background: 'var(--neutral-300)' }}>
           <div
-            className="h-2 rounded-full bg-indigo-500 transition-all duration-500"
-            style={{ width: `${progress}%` }}
+            style={{ height: 6, background: 'var(--accent)', transition: 'width 0.5s', width: `${progress}%` }}
           />
         </div>
       </div>
 
       {/* Timer — always visible */}
-      <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-3 flex items-center gap-3">
-        <div className="flex-1">
-          <Timer
-            key={timerKey}
-            defaultSeconds={timerRestSeconds}
-            autoStart={timerRunning}
-            className="py-0"
-          />
-        </div>
+      <div style={{ margin: '0 20px 14px', background: 'var(--text)', color: 'var(--bg)', padding: '15px 17px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Timer
+          key={timerKey}
+          defaultSeconds={timerRestSeconds}
+          autoStart={timerRunning}
+        />
       </div>
 
       {/* Exercises */}
-      <div className="space-y-3">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 20px' }}>
         {activeSession.exercises.map((ex, ei) => {
           const tplEx = template?.exercises.find((e) => e.id === ex.exerciseId)
           const allDone = ex.sets.every((s) => s.completed)
@@ -102,127 +100,129 @@ export default function ActiveWorkoutPage() {
           return (
             <div
               key={ex.exerciseId}
-              className={cn(
-                'rounded-2xl border transition-all',
-                allDone ? 'bg-green-500/5 border-green-500/20' : 'bg-[#111118] border-[#1e1e2e]'
-              )}
+              style={{
+                border: allDone ? '2px solid var(--accent)' : '1px solid var(--divider)',
+                background: allDone ? 'var(--accent-light)' : 'var(--surface)',
+              }}
             >
               {/* Exercise header */}
               <button
-                className="w-full flex items-center justify-between p-4 text-left"
+                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer' }}
                 onClick={() => setExpandedExercise(isExpanded ? -1 : ei)}
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  {allDone && <Check size={18} className="text-green-400 flex-shrink-0" />}
-                  <div className="min-w-0">
-                    <p className={cn('font-semibold', allDone ? 'text-green-400' : 'text-white')}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                  {allDone && <Check size={16} style={{ color: 'var(--accent)', flexShrink: 0 }} />}
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: allDone ? 'var(--accent-dark)' : 'var(--text)' }}>
                       {ex.exerciseName}
-                    </p>
-                    <p className="text-slate-500 text-xs">
+                    </div>
+                    <div className="k" style={{ marginTop: 3 }}>
                       {ex.sets.filter((s) => s.completed).length}/{ex.sets.length} serie
-                      {tplEx && ` · ${tplEx.defaultReps} rip · ${tplEx.restSeconds}s recupero`}
-                    </p>
+                      {tplEx && ` · ${tplEx.defaultReps} rip · ${tplEx.restSeconds}s rec.`}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                  {/* Exercise info button (wger.de API) */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, marginLeft: 8 }}>
                   <button
                     onClick={(e) => { e.stopPropagation(); openExerciseModal(ex.exerciseName) }}
-                    className="flex items-center gap-1 rounded-lg border border-[#2d2d3a] px-2 py-1 text-xs text-slate-500 hover:text-indigo-400 hover:border-indigo-500/30 transition-colors"
+                    style={{ display: 'flex', alignItems: 'center', gap: 4, border: '1px solid var(--divider)', padding: '4px 8px', fontSize: 11, color: 'var(--muted)', background: 'none', cursor: 'pointer' }}
                   >
                     <Dumbbell size={11} />
                     Demo
                   </button>
-                  {isExpanded ? <ChevronUp size={16} className="text-slate-500" /> : <ChevronDown size={16} className="text-slate-500" />}
+                  {isExpanded ? <ChevronUp size={16} style={{ color: 'var(--muted)' }} /> : <ChevronDown size={16} style={{ color: 'var(--muted)' }} />}
                 </div>
               </button>
 
               {/* Sets */}
               {isExpanded && (
-                <div className="px-4 pb-4 space-y-2 border-t border-[#1e1e2e] pt-3">
+                <div style={{ padding: '12px 16px 16px', borderTop: '1px solid var(--divider)' }}>
                   {/* Tip */}
                   {tplEx?.tips && (
-                    <div className="flex gap-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 p-3 mb-2">
-                      <Lightbulb size={14} className="text-indigo-400 flex-shrink-0 mt-0.5" />
-                      <p className="text-indigo-300 text-xs">{tplEx.tips}</p>
+                    <div style={{ display: 'flex', gap: 8, border: '1px solid var(--accent)', background: 'var(--accent-light)', padding: 12, marginBottom: 10 }}>
+                      <Lightbulb size={13} style={{ color: 'var(--accent-dark)', flexShrink: 0, marginTop: 1 }} />
+                      <div style={{ fontSize: 12, color: 'var(--accent-dark)' }}>{tplEx.tips}</div>
                     </div>
                   )}
                   {/* Instructions */}
                   {tplEx?.instructions && (
-                    <div className="flex gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3 mb-3">
-                      <BookOpen size={14} className="text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <p className="text-emerald-300 text-xs leading-relaxed">{tplEx.instructions}</p>
+                    <div style={{ display: 'flex', gap: 8, border: '1px solid var(--divider)', background: 'var(--surface)', padding: 12, marginBottom: 12 }}>
+                      <BookOpen size={13} style={{ color: 'var(--muted)', flexShrink: 0, marginTop: 1 }} />
+                      <div style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }}>{tplEx.instructions}</div>
                     </div>
                   )}
 
-                  {ex.sets.map((set, si) => (
-                    <div
-                      key={si}
-                      className={cn(
-                        'flex items-center gap-2 rounded-xl px-2 py-2',
-                        set.completed ? 'bg-green-500/10' : 'bg-[#0a0a0f]'
-                      )}
-                    >
-                      {/* Set number */}
-                      <span className="w-5 text-slate-500 text-sm font-mono flex-shrink-0">{si + 1}</span>
-
-                      {/* Weight with +/- */}
-                      <div className="flex items-center gap-1 flex-1">
-                        <button
-                          onClick={() => updateExerciseSet(ei, si, 'weight', Math.max(0, (set.weight || 0) - 2.5))}
-                          className="h-8 w-8 rounded-lg bg-[#1e1e2e] text-slate-400 hover:text-white hover:bg-[#2d2d3a] flex items-center justify-center flex-shrink-0 text-lg font-bold"
-                        >
-                          −
-                        </button>
-                        <input
-                          type="number"
-                          value={set.weight || ''}
-                          placeholder="0"
-                          onChange={(e) => updateExerciseSet(ei, si, 'weight', parseFloat(e.target.value) || 0)}
-                          className="w-12 rounded-lg bg-[#1e1e2e] border border-[#2d2d3a] px-1 py-1.5 text-center text-white text-sm focus:outline-none focus:border-indigo-500"
-                        />
-                        <button
-                          onClick={() => updateExerciseSet(ei, si, 'weight', (set.weight || 0) + 2.5)}
-                          className="h-8 w-8 rounded-lg bg-[#1e1e2e] text-slate-400 hover:text-white hover:bg-[#2d2d3a] flex items-center justify-center flex-shrink-0 text-lg font-bold"
-                        >
-                          +
-                        </button>
-                        <span className="text-xs text-slate-600">kg</span>
-                      </div>
-
-                      {/* Reps */}
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <input
-                          type="number"
-                          value={set.reps || ''}
-                          placeholder="0"
-                          onChange={(e) => updateExerciseSet(ei, si, 'reps', parseInt(e.target.value) || 0)}
-                          className="w-12 rounded-lg bg-[#1e1e2e] border border-[#2d2d3a] px-1 py-1.5 text-center text-white text-sm focus:outline-none focus:border-indigo-500"
-                        />
-                        <span className="text-xs text-slate-600">rip</span>
-                      </div>
-
-                      {/* Complete button */}
-                      <button
-                        onClick={() => {
-                          toggleSetComplete(ei, si)
-                          if (!set.completed && tplEx) {
-                            setTimerRestSeconds(tplEx.restSeconds)
-                            setTimerKey((k) => k + 1)
-                            setTimerRunning(true)
-                          }
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {ex.sets.map((set, si) => (
+                      <div
+                        key={si}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
+                          background: set.completed ? 'var(--accent-light)' : 'var(--bg)',
+                          border: set.completed ? '1px solid var(--accent)' : '1px solid var(--divider)',
                         }}
-                        className={cn(
-                          'h-9 w-9 flex items-center justify-center rounded-lg transition-all flex-shrink-0',
-                          set.completed
-                            ? 'bg-green-500 text-white'
-                            : 'border border-[#2d2d3a] text-slate-500 hover:border-indigo-500 hover:text-indigo-400'
-                        )}
                       >
-                        <Check size={16} />
-                      </button>
-                    </div>
-                  ))}
+                        {/* Set number */}
+                        <span style={{ width: 18, color: 'var(--muted)', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>{si + 1}</span>
+
+                        {/* Weight with +/- */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1 }}>
+                          <button
+                            onClick={() => updateExerciseSet(ei, si, 'weight', Math.max(0, (set.weight || 0) - 2.5))}
+                            style={{ height: 32, width: 32, background: 'var(--surface)', border: '1px solid var(--divider)', color: 'var(--text)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 16, fontWeight: 800, cursor: 'pointer' }}
+                          >
+                            −
+                          </button>
+                          <input
+                            type="number"
+                            value={set.weight || ''}
+                            placeholder="0"
+                            onChange={(e) => updateExerciseSet(ei, si, 'weight', parseFloat(e.target.value) || 0)}
+                            style={{ width: 44, border: '1px solid var(--divider)', padding: '4px 2px', textAlign: 'center', fontSize: 13, color: 'var(--text)', background: 'var(--bg)', fontFamily: 'Archivo, system-ui' }}
+                          />
+                          <button
+                            onClick={() => updateExerciseSet(ei, si, 'weight', (set.weight || 0) + 2.5)}
+                            style={{ height: 32, width: 32, background: 'var(--surface)', border: '1px solid var(--divider)', color: 'var(--text)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 16, fontWeight: 800, cursor: 'pointer' }}
+                          >
+                            +
+                          </button>
+                          <span className="k">kg</span>
+                        </div>
+
+                        {/* Reps */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                          <input
+                            type="number"
+                            value={set.reps || ''}
+                            placeholder="0"
+                            onChange={(e) => updateExerciseSet(ei, si, 'reps', parseInt(e.target.value) || 0)}
+                            style={{ width: 44, border: '1px solid var(--divider)', padding: '4px 2px', textAlign: 'center', fontSize: 13, color: 'var(--text)', background: 'var(--bg)', fontFamily: 'Archivo, system-ui' }}
+                          />
+                          <span className="k">rip</span>
+                        </div>
+
+                        {/* Complete button */}
+                        <button
+                          onClick={() => {
+                            toggleSetComplete(ei, si)
+                            if (!set.completed && tplEx) {
+                              setTimerRestSeconds(tplEx.restSeconds)
+                              setTimerKey((k) => k + 1)
+                              setTimerRunning(true)
+                            }
+                          }}
+                          style={{
+                            height: 36, width: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: 'pointer',
+                            background: set.completed ? 'var(--accent)' : 'var(--bg)',
+                            border: set.completed ? '1px solid var(--accent)' : '1px solid var(--divider)',
+                            color: set.completed ? 'var(--bg)' : 'var(--muted)',
+                          }}
+                        >
+                          <Check size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -231,25 +231,28 @@ export default function ActiveWorkoutPage() {
       </div>
 
       {/* Notes */}
-      <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4">
-        <p className="text-xs text-slate-400 mb-2">Note sessione</p>
+      <div style={{ margin: '16px 20px', border: '1px solid var(--divider)', padding: '14px 16px', background: 'var(--surface)' }}>
+        <div className="k" style={{ marginBottom: 8 }}>Note sessione</div>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Come ti sei sentito? Cosa migliorare..."
           rows={3}
-          className="w-full bg-transparent text-sm text-white placeholder-slate-600 focus:outline-none resize-none"
+          style={{ width: '100%', background: 'transparent', fontSize: 13, color: 'var(--text)', border: 'none', resize: 'none', fontFamily: 'Archivo, system-ui', outline: 'none' }}
         />
       </div>
 
       {/* Finish */}
-      <button
-        onClick={handleFinish}
-        className="w-full rounded-2xl bg-indigo-600 py-4 text-white font-bold text-lg hover:bg-indigo-500 transition-colors flex items-center justify-center gap-2"
-      >
-        <StopCircle size={22} />
-        Termina sessione
-      </button>
+      <div style={{ padding: '0 20px' }}>
+        <button
+          onClick={handleFinish}
+          className="btn btn-primary btn-block"
+          style={{ minHeight: 50, fontSize: 16, gap: 8 }}
+        >
+          <StopCircle size={20} />
+          Termina sessione
+        </button>
+      </div>
 
       {/* Exercise Info Modal */}
       {exerciseModal && (
@@ -258,20 +261,22 @@ export default function ActiveWorkoutPage() {
 
       {/* Confirm cancel modal */}
       {confirming && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm px-4 pb-8">
-          <div className="w-full max-w-lg rounded-2xl bg-[#111118] border border-[#1e1e2e] p-6 space-y-4">
-            <h3 className="text-white font-bold text-lg">Abbandona sessione?</h3>
-            <p className="text-slate-400 text-sm">I dati non salvati andranno persi.</p>
-            <div className="flex gap-3">
+        <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', padding: '0 16px 32px' }}>
+          <div style={{ width: '100%', maxWidth: 512, background: 'var(--bg)', border: '2px solid var(--divider)', padding: 24 }}>
+            <h3 style={{ fontSize: 18, marginBottom: 8 }}>Abbandona sessione?</h3>
+            <p style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 20 }}>I dati non salvati andranno persi.</p>
+            <div style={{ display: 'flex', gap: 12 }}>
               <button
                 onClick={() => setConfirming(false)}
-                className="flex-1 rounded-xl border border-[#2d2d3a] py-3 text-white font-medium"
+                className="btn btn-secondary"
+                style={{ flex: 1, minHeight: 46 }}
               >
                 Annulla
               </button>
               <button
                 onClick={handleCancel}
-                className="flex-1 rounded-xl bg-red-500/20 border border-red-500/30 py-3 text-red-400 font-medium"
+                className="btn btn-primary"
+                style={{ flex: 1, minHeight: 46 }}
               >
                 Abbandona
               </button>

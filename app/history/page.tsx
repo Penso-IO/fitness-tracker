@@ -1,8 +1,8 @@
 'use client'
 import { useState } from 'react'
 import { useStore } from '@/lib/store'
-import { formatDate, formatDuration, getMuscleColor, getMuscleEmoji } from '@/lib/utils'
-import { Trash2, Clock, ChevronDown, ChevronUp, BookOpen } from 'lucide-react'
+import { formatDate, formatDuration } from '@/lib/utils'
+import { Trash2, Clock, ChevronDown, ChevronUp, BookOpen, Plus } from 'lucide-react'
 
 export default function HistoryPage() {
   const sessions = useStore((s) => s.sessions)
@@ -24,187 +24,191 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="px-4 pt-6 pb-4 space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Storico</h1>
-        <p className="text-slate-500 text-sm mt-1">Cronologia sessioni e consigli dai libri</p>
+    <div style={{ paddingBottom: 26 }}>
+      {/* Header */}
+      <div style={{ padding: '58px 20px 14px', borderBottom: '2px solid rgba(32,30,29,0.4)' }}>
+        <h1 style={{ fontSize: 28, marginBottom: 4 }}>Storico</h1>
+        <div style={{ fontSize: 13, color: 'var(--muted)' }}>Cronologia sessioni e consigli dai libri</div>
       </div>
 
       {/* Tabs */}
-      <div className="flex rounded-xl bg-[#111118] border border-[#1e1e2e] p-1">
-        <button
-          onClick={() => setActiveTab('sessions')}
-          className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${activeTab === 'sessions' ? 'bg-indigo-600 text-white' : 'text-slate-500'}`}
-        >
-          Sessioni ({sessions.length})
-        </button>
-        <button
-          onClick={() => setActiveTab('books')}
-          className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${activeTab === 'books' ? 'bg-indigo-600 text-white' : 'text-slate-500'}`}
-        >
-          Libri ({bookTips.length})
-        </button>
+      <div style={{ display: 'flex', borderBottom: '2px solid rgba(32,30,29,0.4)' }}>
+        {([['sessions', `Sessioni (${sessions.length})`], ['books', `Libri (${bookTips.length})`]] as const).map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setActiveTab(key)}
+            style={{
+              flex: 1, padding: '12px 0', fontFamily: 'Archivo, system-ui', fontWeight: 800, fontSize: 11,
+              letterSpacing: '0.08em', textTransform: 'uppercase',
+              background: 'none', border: 'none', borderBottom: activeTab === key ? '2px solid var(--accent)' : '2px solid transparent',
+              marginBottom: -2, cursor: 'pointer',
+              color: activeTab === key ? 'var(--accent)' : 'var(--muted)',
+            }}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
-      {/* Sessions */}
-      {activeTab === 'sessions' && (
-        sessions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-slate-600 gap-3">
-            <Clock size={48} strokeWidth={1} />
-            <p className="text-sm">Nessuna sessione ancora</p>
-            <p className="text-xs">Completa il tuo primo allenamento</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {sessions.map((session) => (
-              <div key={session.id} className="rounded-2xl bg-[#111118] border border-[#1e1e2e] overflow-hidden">
+      <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+        {/* Sessions */}
+        {activeTab === 'sessions' && (
+          sessions.length === 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 0', color: 'var(--muted)', gap: 12 }}>
+              <Clock size={48} strokeWidth={1} />
+              <div style={{ fontSize: 13 }}>Nessuna sessione ancora</div>
+              <div style={{ fontSize: 12 }}>Completa il tuo primo allenamento</div>
+            </div>
+          ) : (
+            sessions.map((session) => (
+              <div key={session.id} style={{ border: '1px solid var(--divider)', background: 'var(--surface)', overflow: 'hidden' }}>
                 <button
-                  className="w-full flex items-center justify-between p-4 text-left"
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer' }}
                   onClick={() => setExpanded(expanded === session.id ? null : session.id)}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{getMuscleEmoji(session.muscleGroups[0])}</span>
-                    <div>
-                      <p className="text-white font-semibold">{session.templateName}</p>
-                      <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
-                        <span>{formatDate(session.date)}</span>
-                        {session.durationMinutes && (
-                          <>
-                            <span>·</span>
-                            <Clock size={10} />
-                            <span>{formatDuration(session.durationMinutes)}</span>
-                          </>
-                        )}
-                      </div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--text)' }}>{session.templateName}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 3 }}>
+                      <span className="k">{formatDate(session.date)}</span>
+                      {session.durationMinutes && (
+                        <>
+                          <span className="k">·</span>
+                          <Clock size={9} style={{ color: 'var(--muted)' }} />
+                          <span className="k">{formatDuration(session.durationMinutes)}</span>
+                        </>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <button
                       onClick={(e) => { e.stopPropagation(); deleteSession(session.id) }}
-                      className="text-slate-600 hover:text-red-400 p-1 transition-colors"
+                      style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={15} />
                     </button>
-                    {expanded === session.id ? <ChevronUp size={16} className="text-slate-500" /> : <ChevronDown size={16} className="text-slate-500" />}
+                    {expanded === session.id ? <ChevronUp size={15} style={{ color: 'var(--muted)' }} /> : <ChevronDown size={15} style={{ color: 'var(--muted)' }} />}
                   </div>
                 </button>
 
                 {expanded === session.id && (
-                  <div className="px-4 pb-4 border-t border-[#1e1e2e] pt-3 space-y-3">
+                  <div style={{ padding: '12px 16px 16px', borderTop: '1px solid var(--divider)', display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {/* Muscle tags */}
-                    <div className="flex flex-wrap gap-1.5">
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
                       {session.muscleGroups.map((m) => (
-                        <span key={m} className={`rounded-full border px-2 py-0.5 text-xs font-medium ${getMuscleColor(m)}`}>{m}</span>
+                        <span key={m} className="tag tag-neutral">{m}</span>
                       ))}
                     </div>
 
                     {/* Exercises summary */}
-                    {session.exercises.map((ex) => {
-                      const done = ex.sets.filter((s) => s.completed)
-                      const maxWeight = Math.max(...ex.sets.map((s) => s.weight || 0))
-                      return (
-                        <div key={ex.exerciseId} className="flex items-center justify-between py-2 border-b border-[#1e1e2e] last:border-0">
-                          <p className="text-slate-300 text-sm">{ex.exerciseName}</p>
-                          <div className="text-right">
-                            <p className="text-white text-sm font-medium">{done.length}/{ex.sets.length} serie</p>
-                            {maxWeight > 0 && <p className="text-slate-500 text-xs">{maxWeight}kg max</p>}
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      {session.exercises.map((ex, i) => {
+                        const done = ex.sets.filter((s) => s.completed)
+                        const maxWeight = Math.max(...ex.sets.map((s) => s.weight || 0))
+                        return (
+                          <div key={ex.exerciseId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < session.exercises.length - 1 ? '1px solid var(--divider)' : 'none' }}>
+                            <div style={{ fontSize: 13, color: 'var(--text)' }}>{ex.exerciseName}</div>
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontWeight: 800, fontSize: 13 }}>{done.length}/{ex.sets.length} serie</div>
+                              {maxWeight > 0 && <div className="k">{maxWeight}kg max</div>}
+                            </div>
                           </div>
-                        </div>
-                      )
-                    })}
+                        )
+                      })}
+                    </div>
 
                     {session.notes && (
-                      <p className="text-slate-500 text-xs italic border-t border-[#1e1e2e] pt-2">"{session.notes}"</p>
+                      <div style={{ color: 'var(--muted)', fontSize: 12, fontStyle: 'italic', borderTop: '1px solid var(--divider)', paddingTop: 8 }}>"{session.notes}"</div>
                     )}
                   </div>
                 )}
               </div>
-            ))}
-          </div>
-        )
-      )}
+            ))
+          )
+        )}
 
-      {/* Book tips */}
-      {activeTab === 'books' && (
-        <div className="space-y-4">
-          <button
-            onClick={() => setShowTipForm((v) => !v)}
-            className="flex items-center gap-2 w-full rounded-xl border border-dashed border-indigo-500/40 py-3 text-indigo-400 text-sm font-medium justify-center hover:bg-indigo-500/5 transition-colors"
-          >
-            <BookOpen size={16} />
-            Aggiungi consiglio dal libro
-          </button>
+        {/* Book tips */}
+        {activeTab === 'books' && (
+          <>
+            <button
+              onClick={() => setShowTipForm((v) => !v)}
+              style={{ width: '100%', border: '1px dashed var(--divider)', padding: '12px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: 'var(--muted)', background: 'none', cursor: 'pointer', fontFamily: 'Archivo, system-ui', fontWeight: 800, fontSize: 12, letterSpacing: '0.06em', textTransform: 'uppercase' }}
+            >
+              <BookOpen size={14} />
+              Aggiungi consiglio dal libro
+            </button>
 
-          {showTipForm && (
-            <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4 space-y-3">
-              <div>
-                <label className="text-xs text-slate-400 mb-1 block">Titolo libro</label>
-                <input
-                  type="text"
-                  value={tipForm.book}
-                  onChange={(e) => setTipForm({ ...tipForm, book: e.target.value })}
-                  placeholder="Es. Starting Strength"
-                  className="w-full rounded-xl bg-[#0a0a0f] border border-[#2d2d3a] px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-slate-400 mb-1 block">Categoria</label>
-                <select
-                  value={tipForm.category}
-                  onChange={(e) => setTipForm({ ...tipForm, category: e.target.value as 'nutrition' | 'training' | 'recovery' })}
-                  className="w-full rounded-xl bg-[#0a0a0f] border border-[#2d2d3a] px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
-                >
-                  <option value="training">Allenamento</option>
-                  <option value="nutrition">Nutrizione</option>
-                  <option value="recovery">Recupero</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-xs text-slate-400 mb-1 block">Consiglio / citazione</label>
-                <textarea
-                  value={tipForm.tip}
-                  onChange={(e) => setTipForm({ ...tipForm, tip: e.target.value })}
-                  placeholder="Incolla qui il consiglio o la frase chiave dal libro..."
-                  rows={4}
-                  className="w-full rounded-xl bg-[#0a0a0f] border border-[#2d2d3a] px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500 resize-none"
-                />
-              </div>
-              <div className="flex gap-3">
-                <button onClick={() => setShowTipForm(false)} className="flex-1 rounded-xl border border-[#2d2d3a] py-3 text-slate-400 text-sm">
-                  Annulla
-                </button>
-                <button onClick={handleAddTip} className="flex-1 rounded-xl bg-indigo-600 py-3 text-white font-medium text-sm">
-                  Salva
-                </button>
-              </div>
-            </div>
-          )}
-
-          {bookTips.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-slate-600 gap-2">
-              <BookOpen size={40} strokeWidth={1} />
-              <p className="text-sm">Nessun consiglio ancora</p>
-              <p className="text-xs text-center">Aggiungi frasi chiave dai tuoi libri<br />di allenamento e nutrizione</p>
-            </div>
-          ) : (
-            bookTips.map((tip) => (
-              <div key={tip.id} className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <BookOpen size={14} className="text-indigo-400" />
-                    <span className="text-xs text-indigo-400 font-medium">{tip.book}</span>
-                    <span className="text-xs text-slate-600 border border-slate-700 rounded-full px-2 py-0.5">{tip.category}</span>
-                  </div>
-                  <button onClick={() => deleteBookTip(tip.id)} className="text-slate-600 hover:text-red-400 p-1 transition-colors">
-                    <Trash2 size={14} />
+            {showTipForm && (
+              <div style={{ border: '1px solid var(--divider)', padding: '14px 16px', background: 'var(--surface)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div>
+                  <label className="k" style={{ display: 'block', marginBottom: 4 }}>Titolo libro</label>
+                  <input
+                    type="text"
+                    value={tipForm.book}
+                    onChange={(e) => setTipForm({ ...tipForm, book: e.target.value })}
+                    placeholder="Es. Starting Strength"
+                    className="input"
+                  />
+                </div>
+                <div>
+                  <label className="k" style={{ display: 'block', marginBottom: 4 }}>Categoria</label>
+                  <select
+                    value={tipForm.category}
+                    onChange={(e) => setTipForm({ ...tipForm, category: e.target.value as 'nutrition' | 'training' | 'recovery' })}
+                    style={{ width: '100%', border: '1px solid var(--divider)', padding: '7px 10px', fontSize: 13, color: 'var(--text)', background: 'var(--bg)', fontFamily: 'Archivo, system-ui' }}
+                  >
+                    <option value="training">Allenamento</option>
+                    <option value="nutrition">Nutrizione</option>
+                    <option value="recovery">Recupero</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="k" style={{ display: 'block', marginBottom: 4 }}>Consiglio / citazione</label>
+                  <textarea
+                    value={tipForm.tip}
+                    onChange={(e) => setTipForm({ ...tipForm, tip: e.target.value })}
+                    placeholder="Incolla qui il consiglio o la frase chiave dal libro..."
+                    rows={4}
+                    style={{ width: '100%', border: '1px solid var(--divider)', padding: '6px 10px', fontSize: 13, color: 'var(--text)', background: 'var(--bg)', fontFamily: 'Archivo, system-ui', resize: 'none', outline: 'none' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button onClick={() => setShowTipForm(false)} className="btn btn-secondary" style={{ flex: 1, minHeight: 44 }}>
+                    Annulla
+                  </button>
+                  <button onClick={handleAddTip} className="btn btn-primary" style={{ flex: 1, minHeight: 44 }}>
+                    Salva
                   </button>
                 </div>
-                <p className="text-slate-300 text-sm italic">"{tip.tip}"</p>
               </div>
-            ))
-          )}
-        </div>
-      )}
+            )}
+
+            {bookTips.length === 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 0', gap: 10, color: 'var(--muted)' }}>
+                <BookOpen size={40} strokeWidth={1} />
+                <div style={{ fontSize: 13 }}>Nessun consiglio ancora</div>
+                <div style={{ fontSize: 12, textAlign: 'center' }}>Aggiungi frasi chiave dai tuoi libri<br />di allenamento e nutrizione</div>
+              </div>
+            ) : (
+              bookTips.map((tip) => (
+                <div key={tip.id} style={{ border: '1px solid var(--divider)', padding: '14px 16px', background: 'var(--surface)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <BookOpen size={12} style={{ color: 'var(--muted)' }} />
+                      <span style={{ fontWeight: 800, fontSize: 12, color: 'var(--text)' }}>{tip.book}</span>
+                      <span className="tag tag-neutral">{tip.category}</span>
+                    </div>
+                    <button onClick={() => deleteBookTip(tip.id)} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                  <div style={{ fontSize: 13, color: 'var(--text)', fontStyle: 'italic' }}>"{tip.tip}"</div>
+                </div>
+              ))
+            )}
+          </>
+        )}
+      </div>
     </div>
   )
 }

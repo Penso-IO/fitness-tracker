@@ -3,8 +3,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import { WorkoutTemplate } from '@/types'
-import { getMuscleColor, getMuscleEmoji, todayStr } from '@/lib/utils'
-import { Clock, ChevronRight, Calendar, Plus, Pencil, Trash2, Lock, ChevronDown, ChevronUp, Dumbbell } from 'lucide-react'
+import { todayStr } from '@/lib/utils'
+import { Clock, Plus, Pencil, Trash2, Lock, ChevronDown, ChevronUp, Dumbbell, Calendar } from 'lucide-react'
 import CustomWorkoutEditor from '@/components/CustomWorkoutEditor'
 import ExerciseInfoModal from '@/components/ExerciseInfoModal'
 
@@ -27,50 +27,45 @@ function TemplateCard({
   const isCustom = !!onEdit
 
   return (
-    <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] hover:border-indigo-500/20 transition-all overflow-hidden">
+    <div style={{ border: '1px solid var(--divider)', background: 'var(--surface)' }}>
       {/* Card header */}
-      <div className="flex items-start gap-2 p-4">
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '14px 20px' }}>
         <button
           onClick={onStart}
           disabled={disabled}
-          className="flex-1 text-left disabled:opacity-50 disabled:cursor-not-allowed min-w-0"
+          style={{ flex: 1, textAlign: 'left', opacity: disabled ? 0.5 : 1, cursor: disabled ? 'not-allowed' : 'pointer', background: 'none', border: 'none', padding: 0, minWidth: 0 }}
         >
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-xl flex-shrink-0">{getMuscleEmoji(template.muscleGroups[0])}</span>
-            <h3 className="text-white font-semibold truncate">{template.name}</h3>
-          </div>
+          <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--text)', marginBottom: 4 }}>{template.name}</div>
           {template.description && (
-            <p className="text-slate-500 text-xs mb-2 line-clamp-2">{template.description}</p>
+            <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>{template.description}</div>
           )}
-          <div className="flex flex-wrap gap-1.5 mb-2">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 6 }}>
             {template.muscleGroups.map((m) => (
-              <span key={m} className={`rounded-full border px-2 py-0.5 text-xs font-medium ${getMuscleColor(m)}`}>
-                {m}
-              </span>
+              <span key={m} className="tag tag-neutral">{m}</span>
             ))}
           </div>
-          <div className="flex items-center gap-1 text-slate-500 text-xs">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--muted)', fontSize: 12 }}>
             <Clock size={12} />
             <span>~{template.estimatedMinutes} min</span>
-            <span className="mx-1">·</span>
+            <span style={{ margin: '0 2px' }}>·</span>
             <span>{template.exercises.length} esercizi</span>
           </div>
         </button>
 
         {/* Action buttons */}
-        <div className="flex flex-col items-center gap-1 flex-shrink-0">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
           {isCustom ? (
             <>
-              <button onClick={onEdit} className="p-2 rounded-lg text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors" title="Modifica">
+              <button onClick={onEdit} style={{ padding: 8, color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer' }} title="Modifica">
                 <Pencil size={14} />
               </button>
-              <button onClick={onDelete} className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors" title="Elimina">
+              <button onClick={onDelete} style={{ padding: 8, color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer' }} title="Elimina">
                 <Trash2 size={14} />
               </button>
             </>
           ) : (
-            <button onClick={onStart} disabled={disabled} className="p-2 text-slate-600 disabled:opacity-40">
-              <ChevronRight size={20} />
+            <button onClick={onStart} disabled={disabled} style={{ padding: 8, color: 'var(--muted)', background: 'none', border: 'none', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.4 : 1 }}>
+              <ChevronDown size={20} />
             </button>
           )}
         </div>
@@ -79,28 +74,28 @@ function TemplateCard({
       {/* Toggle exercise list */}
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center justify-between px-4 py-2 border-t border-[#1e1e2e] text-slate-500 hover:text-slate-300 hover:bg-white/[0.02] transition-colors"
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 20px', borderTop: '1px solid var(--divider)', borderLeft: 'none', borderRight: 'none', borderBottom: 'none', color: 'var(--muted)', background: 'none', cursor: 'pointer' }}
       >
-        <span className="text-xs">Vedi esercizi</span>
+        <span className="k">Vedi esercizi</span>
         {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
       </button>
 
       {/* Exercise list */}
       {expanded && (
-        <div className="border-t border-[#1e1e2e] divide-y divide-[#1e1e2e]">
-          {template.exercises.map((ex) => (
-            <div key={ex.id} className="flex items-center gap-3 px-4 py-2.5">
-              <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-medium truncate">{ex.name}</p>
-                <p className="text-slate-500 text-xs">
+        <div style={{ borderTop: '1px solid var(--divider)' }}>
+          {template.exercises.map((ex, idx) => (
+            <div key={ex.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 20px', borderBottom: idx < template.exercises.length - 1 ? '1px solid var(--divider)' : 'none' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 800, fontSize: 13, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ex.name}</div>
+                <div className="k" style={{ marginTop: 3 }}>
                   {ex.defaultSets}×{ex.defaultReps}
                   {ex.restSeconds > 0 && ` · ${ex.restSeconds}s rec.`}
-                </p>
-                {ex.tips && <p className="text-indigo-400 text-xs mt-0.5 truncate">{ex.tips}</p>}
+                </div>
+                {ex.tips && <div style={{ color: 'var(--accent-dark)', fontSize: 11, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ex.tips}</div>}
               </div>
               <button
                 onClick={() => onExerciseDemo(ex.name)}
-                className="flex items-center gap-1 rounded-lg border border-[#2d2d3a] px-2 py-1 text-xs text-slate-500 hover:text-indigo-400 hover:border-indigo-500/30 transition-colors flex-shrink-0"
+                style={{ display: 'flex', alignItems: 'center', gap: 4, border: '1px solid var(--divider)', padding: '4px 8px', fontSize: 11, color: 'var(--muted)', background: 'none', cursor: 'pointer', flexShrink: 0 }}
               >
                 <Dumbbell size={11} />
                 Demo
@@ -109,11 +104,12 @@ function TemplateCard({
           ))}
 
           {/* Start from expanded view */}
-          <div className="px-4 py-3">
+          <div style={{ padding: '12px 20px' }}>
             <button
               onClick={onStart}
               disabled={disabled}
-              className="w-full rounded-xl bg-indigo-600 py-2.5 text-white text-sm font-semibold hover:bg-indigo-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="btn btn-primary btn-block"
+              style={{ opacity: disabled ? 0.4 : 1 }}
             >
               Inizia sessione →
             </button>
@@ -169,22 +165,23 @@ export default function WorkoutPage() {
   }
 
   return (
-    <div className="px-4 pt-6 pb-4 space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Scegli scheda</h1>
-        <p className="text-slate-500 text-sm mt-1">Seleziona o crea il tuo allenamento di oggi</p>
+    <div style={{ paddingBottom: 26 }}>
+      {/* Header */}
+      <div style={{ padding: '58px 20px 14px', borderBottom: '2px solid rgba(32,30,29,0.4)' }}>
+        <h1 style={{ fontSize: 28, marginBottom: 4 }}>Scegli scheda</h1>
+        <div style={{ fontSize: 13, color: 'var(--muted)' }}>Seleziona o crea il tuo allenamento di oggi</div>
       </div>
 
       {/* Active session banner */}
       {activeSession && (
-        <div className="rounded-2xl bg-green-500/10 border border-green-500/30 p-4 flex items-center justify-between">
+        <div style={{ margin: '16px 20px', border: '2px solid var(--accent)', background: 'var(--accent-light)', padding: '13px 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <p className="text-green-400 font-semibold text-sm">Sessione in corso</p>
-            <p className="text-white font-bold">{activeSession.templateName}</p>
+            <div className="k" style={{ color: 'var(--accent-dark)' }}>Sessione in corso</div>
+            <div style={{ fontWeight: 800, fontSize: 15, marginTop: 4 }}>{activeSession.templateName}</div>
           </div>
           <button
             onClick={() => router.push('/workout/active')}
-            className="rounded-xl bg-green-500 px-3 py-2 text-sm font-medium text-white"
+            className="btn btn-primary"
           >
             Riprendi
           </button>
@@ -192,30 +189,31 @@ export default function WorkoutPage() {
       )}
 
       {/* Date picker */}
-      <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <Calendar size={16} className="text-indigo-400" />
-          <span className="text-sm text-slate-400 font-medium">Data sessione</span>
+      <div style={{ margin: '16px 20px', border: '1px solid var(--divider)', padding: '14px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <Calendar size={14} style={{ color: 'var(--muted)' }} />
+          <span className="k">Data sessione</span>
         </div>
         <input
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          className="w-full rounded-xl bg-[#0a0a0f] border border-[#2d2d3a] px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
+          className="input"
         />
       </div>
 
-      {/* ── Le mie schede ── */}
-      <section>
-        <div className="flex items-center justify-between mb-3">
+      {/* Le mie schede */}
+      <div style={{ padding: '0 20px 8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
           <div>
-            <h2 className="text-white font-semibold">Le mie schede</h2>
-            <p className="text-slate-600 text-xs mt-0.5">{customWorkouts.length}/5 schede</p>
+            <span className="k">Le mie schede</span>
+            <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{customWorkouts.length}/5 schede</div>
           </div>
           {customWorkouts.length < 5 && (
             <button
               onClick={openCreate}
-              className="flex items-center gap-1.5 rounded-xl bg-indigo-600/20 border border-indigo-500/30 px-3 py-2 text-xs font-medium text-indigo-400 hover:bg-indigo-600/30 transition-colors"
+              className="btn btn-secondary"
+              style={{ fontSize: 12 }}
             >
               <Plus size={13} />
               Nuova
@@ -226,13 +224,13 @@ export default function WorkoutPage() {
         {customWorkouts.length === 0 ? (
           <button
             onClick={openCreate}
-            className="w-full rounded-2xl border border-dashed border-[#2d2d3a] py-10 flex flex-col items-center gap-2 text-slate-600 hover:text-indigo-400 hover:border-indigo-500/30 transition-colors"
+            style={{ width: '100%', border: '1px dashed var(--divider)', padding: '32px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, color: 'var(--muted)', background: 'none', cursor: 'pointer' }}
           >
             <Plus size={22} />
-            <span className="text-sm">Crea la tua prima scheda personalizzata</span>
+            <span style={{ fontSize: 13 }}>Crea la tua prima scheda personalizzata</span>
           </button>
         ) : (
-          <div className="space-y-3">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {customWorkouts.map((t) => (
               <TemplateCard
                 key={t.id}
@@ -246,16 +244,16 @@ export default function WorkoutPage() {
             ))}
           </div>
         )}
-      </section>
+      </div>
 
-      {/* ── Libreria ── */}
-      <section>
-        <div className="flex items-center gap-2 mb-1">
-          <h2 className="text-white font-semibold">Libreria allenamenti</h2>
-          <Lock size={12} className="text-slate-600" />
+      {/* Libreria */}
+      <div style={{ padding: '16px 20px 8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+          <span className="k">Libreria allenamenti</span>
+          <Lock size={10} style={{ color: 'var(--muted)' }} />
         </div>
-        <p className="text-slate-600 text-xs mb-3">Schede predefinite — sola lettura</p>
-        <div className="space-y-3">
+        <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 10 }}>Schede predefinite — sola lettura</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {libraryTemplates.map((t) => (
             <TemplateCard
               key={t.id}
@@ -266,7 +264,7 @@ export default function WorkoutPage() {
             />
           ))}
         </div>
-      </section>
+      </div>
 
       {/* Custom Workout Editor */}
       {editorOpen && (

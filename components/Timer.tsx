@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Play, Pause, RotateCcw, Bell } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 interface TimerProps {
   defaultSeconds?: number
@@ -10,7 +9,7 @@ interface TimerProps {
   className?: string
 }
 
-export default function Timer({ defaultSeconds = 90, autoStart, onComplete, className }: TimerProps) {
+export default function Timer({ defaultSeconds = 90, autoStart, onComplete }: TimerProps) {
   const [seconds, setSeconds] = useState(defaultSeconds)
   const [running, setRunning] = useState(autoStart ?? false)
   const [finished, setFinished] = useState(false)
@@ -84,67 +83,59 @@ export default function Timer({ defaultSeconds = 90, autoStart, onComplete, clas
   const secs = seconds % 60
 
   return (
-    <div className={cn('flex flex-col items-center gap-3', className)}>
-      {/* Circle */}
-      <div className="relative flex h-28 w-28 items-center justify-center">
-        <svg className="absolute inset-0 -rotate-90" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="44" fill="none" stroke="#1e1e2e" strokeWidth="8" />
-          <circle
-            cx="50" cy="50" r="44" fill="none"
-            stroke={finished ? '#22c55e' : '#6366f1'}
-            strokeWidth="8"
-            strokeDasharray={`${2 * Math.PI * 44}`}
-            strokeDashoffset={`${2 * Math.PI * 44 * (1 - pct / 100)}`}
-            strokeLinecap="round"
-            className="transition-all duration-1000"
+    <div style={{ display: 'flex', alignItems: 'center', gap: 16, width: '100%', color: 'var(--bg)' }}>
+      {/* Time display */}
+      <div style={{ flex: 1 }}>
+        {finished ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Bell size={22} style={{ color: 'var(--bg)', opacity: 0.9 }} className="animate-bounce" />
+            <span style={{ fontWeight: 800, fontSize: 20 }}>Pronti!</span>
+          </div>
+        ) : (
+          <div style={{ fontWeight: 800, fontSize: 28, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em', color: 'var(--bg)' }}>
+            {mins}:{secs.toString().padStart(2, '0')}
+          </div>
+        )}
+        {/* Progress bar */}
+        <div style={{ height: 3, background: 'rgba(243,242,242,0.2)', marginTop: 8 }}>
+          <div
+            style={{ height: 3, background: finished ? 'rgba(243,242,242,0.9)' : 'rgba(243,242,242,0.7)', width: `${pct}%`, transition: 'width 1s linear' }}
           />
-        </svg>
-        <div className="flex flex-col items-center">
-          {finished ? (
-            <Bell size={28} className="text-green-400 animate-bounce" />
-          ) : (
-            <span className="text-2xl font-bold tabular-nums">
-              {mins}:{secs.toString().padStart(2, '0')}
-            </span>
-          )}
-          {finished && <span className="text-xs text-green-400 font-medium mt-1">Pronti!</span>}
         </div>
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-3">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         <button
           onClick={reset}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-[#2d2d3a] text-slate-400 hover:text-white hover:border-slate-500 transition-colors"
+          style={{ height: 36, width: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(243,242,242,0.3)', color: 'rgba(243,242,242,0.7)', background: 'none', cursor: 'pointer' }}
         >
-          <RotateCcw size={16} />
+          <RotateCcw size={14} />
         </button>
         <button
           onClick={toggle}
-          className={cn(
-            'flex h-14 w-14 items-center justify-center rounded-full font-medium transition-all shadow-lg',
-            running
-              ? 'bg-red-500/20 border border-red-500/50 text-red-400 hover:bg-red-500/30'
-              : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-indigo-900/50'
-          )}
+          style={{ height: 44, width: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', background: running ? 'rgba(243,242,242,0.15)' : 'rgba(243,242,242,0.9)', border: 'none', cursor: 'pointer', color: running ? 'rgba(243,242,242,0.9)' : 'var(--text)' }}
         >
-          {running ? <Pause size={22} /> : <Play size={22} />}
+          {running ? <Pause size={20} /> : <Play size={20} />}
         </button>
         {/* Preset buttons */}
-        {[60, 90, 120].map((s) => (
-          <button
-            key={s}
-            onClick={() => { setSeconds(s); setRunning(false); setFinished(false) }}
-            className={cn(
-              'rounded-lg px-2 py-1 text-xs font-medium border transition-colors',
-              defaultSeconds === s
-                ? 'border-indigo-500/50 bg-indigo-500/10 text-indigo-400'
-                : 'border-[#2d2d3a] text-slate-500 hover:text-slate-300'
-            )}
-          >
-            {s}s
-          </button>
-        ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {[60, 90, 120].map((s) => (
+            <button
+              key={s}
+              onClick={() => { setSeconds(s); setRunning(false); setFinished(false) }}
+              style={{
+                padding: '2px 7px', fontSize: 10, fontFamily: 'Archivo, system-ui', fontWeight: 800,
+                letterSpacing: '0.06em', cursor: 'pointer',
+                background: defaultSeconds === s ? 'rgba(243,242,242,0.2)' : 'transparent',
+                border: '1px solid rgba(243,242,242,0.25)',
+                color: defaultSeconds === s ? 'rgba(243,242,242,1)' : 'rgba(243,242,242,0.55)',
+              }}
+            >
+              {s}s
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   )

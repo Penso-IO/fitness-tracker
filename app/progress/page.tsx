@@ -66,186 +66,193 @@ export default function ProgressPage() {
 
   const NumField = ({ label, field, unit }: { label: string; field: keyof typeof form; unit: string }) => (
     <div>
-      <label className="text-xs text-slate-400 mb-1 block">{label}</label>
-      <div className="flex items-center gap-2">
+      <label className="k" style={{ display: 'block', marginBottom: 4 }}>{label}</label>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <input
           type="number"
           step="0.1"
           value={form[field]}
           onChange={(e) => setForm({ ...form, [field]: e.target.value })}
           placeholder="—"
-          className="flex-1 rounded-xl bg-[#0a0a0f] border border-[#2d2d3a] px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
+          className="input"
+          style={{ flex: 1 }}
         />
-        <span className="text-slate-500 text-sm w-8">{unit}</span>
+        <span style={{ color: 'var(--muted)', fontSize: 13, width: 28 }}>{unit}</span>
       </div>
     </div>
   )
 
+  const chartStyle = { background: 'var(--bg)', border: '1px solid var(--divider)', borderRadius: 0, color: 'var(--text)', fontSize: 11 }
+
   return (
-    <div className="px-4 pt-6 pb-4 space-y-5">
-      <div className="flex items-center justify-between">
+    <div style={{ paddingBottom: 26 }}>
+      {/* Header */}
+      <div style={{ padding: '58px 20px 14px', borderBottom: '2px solid rgba(32,30,29,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <h1 className="text-2xl font-bold text-white">Progressi</h1>
-          <p className="text-slate-500 text-sm mt-1">Peso, misure e composizione corporea</p>
+          <h1 style={{ fontSize: 28, marginBottom: 4 }}>Progressi</h1>
+          <div style={{ fontSize: 13, color: 'var(--muted)' }}>Peso, misure e composizione corporea</div>
         </div>
         <button
           onClick={() => setShowForm((v) => !v)}
-          className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 transition-colors"
+          className="btn btn-primary"
         >
-          <Plus size={16} />
+          <Plus size={15} />
           Aggiungi
         </button>
       </div>
 
-      {/* Weight chart */}
-      {weightData.length > 1 && (
-        <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4">
-          <h2 className="text-sm font-semibold text-slate-400 mb-3">Andamento peso</h2>
-          <ResponsiveContainer width="100%" height={140}>
-            <LineChart data={weightData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" />
-              <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} domain={['auto', 'auto']} />
-              <Tooltip contentStyle={{ background: '#111118', border: '1px solid #1e1e2e', borderRadius: 8, color: '#e2e8f0' }} />
-              <Line type="monotone" dataKey="peso" stroke="#6366f1" strokeWidth={2} dot={{ fill: '#6366f1', r: 4 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
+      <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-      {/* Exercise progression */}
-      {exerciseNames.length > 0 && (
-        <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <Dumbbell size={16} className="text-indigo-400" />
-            <h2 className="text-sm font-semibold text-slate-400">Progressione esercizi</h2>
+        {/* Weight chart */}
+        {weightData.length > 1 && (
+          <div style={{ border: '1px solid var(--divider)', padding: '14px 16px', background: 'var(--surface)' }}>
+            <span className="k" style={{ display: 'block', marginBottom: 12 }}>Andamento peso</span>
+            <ResponsiveContainer width="100%" height={140}>
+              <LineChart data={weightData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(32,30,29,0.15)" />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#605d5d', fontSize: 10 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#605d5d', fontSize: 10 }} domain={['auto', 'auto']} />
+                <Tooltip contentStyle={chartStyle} />
+                <Line type="monotone" dataKey="peso" stroke="var(--accent)" strokeWidth={2} dot={{ fill: 'var(--accent)', r: 4 }} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
-          <div className="relative">
-            <select
-              value={selectedExercise}
-              onChange={(e) => setSelectedExercise(e.target.value)}
-              className="w-full appearance-none rounded-xl bg-[#0a0a0f] border border-[#2d2d3a] px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500 pr-8"
-            >
-              <option value="">Seleziona esercizio...</option>
-              {exerciseNames.map((name) => (
-                <option key={name} value={name}>{name}</option>
-              ))}
-            </select>
-            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
-          </div>
+        )}
 
-          {selectedExercise && exerciseProgressData.length > 0 && (
-            <div className="space-y-3">
-              <div>
-                <p className="text-xs text-slate-500 mb-2">Peso massimo (kg)</p>
-                <ResponsiveContainer width="100%" height={130}>
-                  <LineChart data={exerciseProgressData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" />
-                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} domain={['auto', 'auto']} />
-                    <Tooltip contentStyle={{ background: '#111118', border: '1px solid #1e1e2e', borderRadius: 8, color: '#e2e8f0' }} />
-                    <Line type="monotone" dataKey="Peso max" stroke="#6366f1" strokeWidth={2} dot={{ fill: '#6366f1', r: 3 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-              <div>
-                <p className="text-xs text-slate-500 mb-2">Volume totale (kg×rip)</p>
-                <ResponsiveContainer width="100%" height={130}>
-                  <LineChart data={exerciseProgressData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" />
-                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} domain={['auto', 'auto']} />
-                    <Tooltip contentStyle={{ background: '#111118', border: '1px solid #1e1e2e', borderRadius: 8, color: '#e2e8f0' }} />
-                    <Line type="monotone" dataKey="Volume" stroke="#f97316" strokeWidth={2} dot={{ fill: '#f97316', r: 3 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+        {/* Exercise progression */}
+        {exerciseNames.length > 0 && (
+          <div style={{ border: '1px solid var(--divider)', padding: '14px 16px', background: 'var(--surface)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <Dumbbell size={14} style={{ color: 'var(--muted)' }} />
+              <span className="k">Progressione esercizi</span>
             </div>
-          )}
-
-          {selectedExercise && exerciseProgressData.length === 0 && (
-            <p className="text-slate-600 text-xs text-center py-4">Nessun dato completato per questo esercizio</p>
-          )}
-        </div>
-      )}
-
-      {/* Add form */}
-      {showForm && (
-        <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4 space-y-4">
-          <h2 className="text-white font-semibold">Nuova misurazione</h2>
-          <div>
-            <label className="text-xs text-slate-400 mb-1 block">Data</label>
-            <input
-              type="date"
-              value={form.date}
-              onChange={(e) => setForm({ ...form, date: e.target.value })}
-              className="w-full rounded-xl bg-[#0a0a0f] border border-[#2d2d3a] px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <NumField label="Peso" field="weight" unit="kg" />
-            <NumField label="Massa grassa" field="bodyFat" unit="%" />
-            <NumField label="Petto" field="chest" unit="cm" />
-            <NumField label="Vita" field="waist" unit="cm" />
-            <NumField label="Fianchi" field="hips" unit="cm" />
-          </div>
-          <div>
-            <label className="text-xs text-slate-400 mb-1 block">Note</label>
-            <input
-              type="text"
-              value={form.notes}
-              onChange={(e) => setForm({ ...form, notes: e.target.value })}
-              placeholder="Come ti senti? Foto scattata?"
-              className="w-full rounded-xl bg-[#0a0a0f] border border-[#2d2d3a] px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-          <div className="flex gap-3">
-            <button onClick={() => setShowForm(false)} className="flex-1 rounded-xl border border-[#2d2d3a] py-3 text-slate-400 text-sm">
-              Annulla
-            </button>
-            <button onClick={handleAdd} className="flex-1 rounded-xl bg-indigo-600 py-3 text-white font-medium text-sm hover:bg-indigo-500 transition-colors">
-              Salva
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Log */}
-      {progressLog.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-slate-600 gap-3">
-          <TrendingUp size={48} strokeWidth={1} />
-          <p className="text-sm">Nessuna misurazione</p>
-          <p className="text-xs">Inizia tracciando il tuo peso oggi</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {progressLog.map((entry) => (
-            <div key={entry.id} className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-white font-semibold">{formatDate(entry.date)}</p>
-                <button onClick={() => deleteProgressEntry(entry.id)} className="text-slate-600 hover:text-red-400 p-1 transition-colors">
-                  <Trash2 size={16} />
-                </button>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { label: 'Peso', value: entry.weight ? `${entry.weight}kg` : '—', color: 'text-indigo-400' },
-                  { label: 'Body fat', value: entry.bodyFat ? `${entry.bodyFat}%` : '—', color: 'text-orange-400' },
-                  { label: 'Vita', value: entry.waist ? `${entry.waist}cm` : '—', color: 'text-pink-400' },
-                  { label: 'Petto', value: entry.chest ? `${entry.chest}cm` : '—', color: 'text-blue-400' },
-                  { label: 'Fianchi', value: entry.hips ? `${entry.hips}cm` : '—', color: 'text-green-400' },
-                ].map((m) => (
-                  <div key={m.label} className="text-center rounded-xl bg-[#0a0a0f] py-2">
-                    <p className={`text-sm font-bold ${m.color}`}>{m.value}</p>
-                    <p className="text-slate-600 text-xs">{m.label}</p>
-                  </div>
+            <div style={{ position: 'relative' }}>
+              <select
+                value={selectedExercise}
+                onChange={(e) => setSelectedExercise(e.target.value)}
+                style={{ width: '100%', appearance: 'none', border: '1px solid var(--divider)', padding: '8px 32px 8px 10px', fontSize: 13, color: 'var(--text)', background: 'var(--bg)', fontFamily: 'Archivo, system-ui' }}
+              >
+                <option value="">Seleziona esercizio...</option>
+                {exerciseNames.map((name) => (
+                  <option key={name} value={name}>{name}</option>
                 ))}
-              </div>
-              {entry.notes && <p className="text-slate-500 text-xs mt-2">{entry.notes}</p>}
+              </select>
+              <ChevronDown size={14} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', pointerEvents: 'none' }} />
             </div>
-          ))}
-        </div>
-      )}
+
+            {selectedExercise && exerciseProgressData.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
+                <div>
+                  <div className="k" style={{ marginBottom: 8 }}>Peso massimo (kg)</div>
+                  <ResponsiveContainer width="100%" height={130}>
+                    <LineChart data={exerciseProgressData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(32,30,29,0.15)" />
+                      <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#605d5d', fontSize: 10 }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#605d5d', fontSize: 10 }} domain={['auto', 'auto']} />
+                      <Tooltip contentStyle={chartStyle} />
+                      <Line type="monotone" dataKey="Peso max" stroke="var(--accent)" strokeWidth={2} dot={{ fill: 'var(--accent)', r: 3 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <div>
+                  <div className="k" style={{ marginBottom: 8 }}>Volume totale (kg×rip)</div>
+                  <ResponsiveContainer width="100%" height={130}>
+                    <LineChart data={exerciseProgressData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(32,30,29,0.15)" />
+                      <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#605d5d', fontSize: 10 }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#605d5d', fontSize: 10 }} domain={['auto', 'auto']} />
+                      <Tooltip contentStyle={chartStyle} />
+                      <Line type="monotone" dataKey="Volume" stroke="var(--text)" strokeWidth={2} dot={{ fill: 'var(--text)', r: 3 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+
+            {selectedExercise && exerciseProgressData.length === 0 && (
+              <div style={{ color: 'var(--muted)', fontSize: 12, textAlign: 'center', padding: '16px 0' }}>Nessun dato completato per questo esercizio</div>
+            )}
+          </div>
+        )}
+
+        {/* Add form */}
+        {showForm && (
+          <div style={{ border: '1px solid var(--divider)', padding: '14px 16px', background: 'var(--surface)', display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ fontWeight: 800, fontSize: 15 }}>Nuova misurazione</div>
+            <div>
+              <label className="k" style={{ display: 'block', marginBottom: 4 }}>Data</label>
+              <input
+                type="date"
+                value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+                className="input"
+              />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <NumField label="Peso" field="weight" unit="kg" />
+              <NumField label="Massa grassa" field="bodyFat" unit="%" />
+              <NumField label="Petto" field="chest" unit="cm" />
+              <NumField label="Vita" field="waist" unit="cm" />
+              <NumField label="Fianchi" field="hips" unit="cm" />
+            </div>
+            <div>
+              <label className="k" style={{ display: 'block', marginBottom: 4 }}>Note</label>
+              <input
+                type="text"
+                value={form.notes}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                placeholder="Come ti senti? Foto scattata?"
+                className="input"
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button onClick={() => setShowForm(false)} className="btn btn-secondary" style={{ flex: 1, minHeight: 44 }}>
+                Annulla
+              </button>
+              <button onClick={handleAdd} className="btn btn-primary" style={{ flex: 1, minHeight: 44 }}>
+                Salva
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Log */}
+        {progressLog.length === 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 0', color: 'var(--muted)', gap: 12 }}>
+            <TrendingUp size={48} strokeWidth={1} />
+            <div style={{ fontSize: 13 }}>Nessuna misurazione</div>
+            <div style={{ fontSize: 12 }}>Inizia tracciando il tuo peso oggi</div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {progressLog.map((entry) => (
+              <div key={entry.id} style={{ border: '1px solid var(--divider)', padding: '14px 16px', background: 'var(--surface)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <div style={{ fontWeight: 800, fontSize: 14 }}>{formatDate(entry.date)}</div>
+                  <button onClick={() => deleteProgressEntry(entry.id)} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                  {[
+                    { label: 'Peso', value: entry.weight ? `${entry.weight}kg` : '—' },
+                    { label: 'Body fat', value: entry.bodyFat ? `${entry.bodyFat}%` : '—' },
+                    { label: 'Vita', value: entry.waist ? `${entry.waist}cm` : '—' },
+                    { label: 'Petto', value: entry.chest ? `${entry.chest}cm` : '—' },
+                    { label: 'Fianchi', value: entry.hips ? `${entry.hips}cm` : '—' },
+                  ].map((m) => (
+                    <div key={m.label} style={{ textAlign: 'center', background: 'var(--bg)', border: '1px solid var(--divider)', padding: '8px 4px' }}>
+                      <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--accent)' }}>{m.value}</div>
+                      <div className="k" style={{ marginTop: 3 }}>{m.label}</div>
+                    </div>
+                  ))}
+                </div>
+                {entry.notes && <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 8 }}>{entry.notes}</div>}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

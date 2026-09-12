@@ -1,16 +1,15 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Dumbbell, Salad, TrendingUp, Clock } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Home, Dumbbell, TrendingUp, Salad, Clock } from 'lucide-react'
 import { useStore } from '@/lib/store'
 
 const links = [
-  { href: '/', label: 'Home', icon: Home },
-  { href: '/workout', label: 'Workout', icon: Dumbbell },
-  { href: '/nutrition', label: 'Nutrizione', icon: Salad },
-  { href: '/progress', label: 'Progressi', icon: TrendingUp },
-  { href: '/history', label: 'Storico', icon: Clock },
+  { href: '/', label: 'OGGI', icon: Home },
+  { href: '/workout', label: 'ESERCIZI', icon: Dumbbell },
+  { href: '/progress', label: 'PROGRESSI', icon: TrendingUp },
+  { href: '/nutrition', label: 'NUTRIZIONE', icon: Salad },
+  { href: '/history', label: 'STORICO', icon: Clock },
 ]
 
 export default function Navigation() {
@@ -18,32 +17,26 @@ export default function Navigation() {
   const activeSession = useStore((s) => s.activeSession)
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#1e1e2e] bg-[#0a0a0f]/95 backdrop-blur-md">
-      <div className="mx-auto flex max-w-lg items-center justify-around px-2 py-2">
+    <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50, borderTop: '2px solid rgba(32,30,29,0.4)', background: '#f3f2f2', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <div style={{ display: 'flex', maxWidth: 512, margin: '0 auto' }}>
         {links.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || (href !== '/' && pathname.startsWith(href))
           const isWorkout = href === '/workout'
           return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                'relative flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-xs transition-all',
-                active
-                  ? 'text-indigo-400'
-                  : 'text-slate-500 hover:text-slate-300'
-              )}
-            >
-              <div className={cn('relative', active && 'scale-110 transition-transform')}>
+            <Link key={href} href={href} style={{
+              flex: 1, minHeight: 52, padding: '9px 0 6px',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+              color: active ? 'var(--accent)' : 'var(--muted)',
+              borderRight: '1px solid var(--divider)',
+              textDecoration: 'none', position: 'relative',
+            }}>
+              <div style={{ position: 'relative' }}>
                 <Icon size={20} strokeWidth={active ? 2.5 : 1.5} />
                 {isWorkout && activeSession && (
-                  <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-green-400 animate-pulse" />
+                  <span style={{ position: 'absolute', right: -4, top: -4, width: 8, height: 8, borderRadius: '50%', background: '#ec3013' }} />
                 )}
               </div>
-              <span className={cn('font-medium', active ? 'text-indigo-400' : '')}>{label}</span>
-              {active && (
-                <span className="absolute -top-0.5 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-indigo-500" />
-              )}
+              <span style={{ fontFamily: 'Archivo, system-ui', fontWeight: 800, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1 }}>{label}</span>
             </Link>
           )
         })}

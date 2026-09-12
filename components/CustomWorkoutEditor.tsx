@@ -68,75 +68,78 @@ export default function CustomWorkoutEditor({ initial, onSave, onClose }: Props)
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm">
+    <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', background: 'rgba(32,30,29,0.6)' }}>
       <div
-        className="w-full max-w-lg rounded-t-3xl bg-[#111118] border-t border-x border-[#1e1e2e] flex flex-col"
-        style={{ maxHeight: '92dvh' }}
+        style={{ width: '100%', maxWidth: 512, background: 'var(--bg)', borderTop: '2px solid var(--divider)', display: 'flex', flexDirection: 'column', maxHeight: '92dvh' }}
       >
         {/* Handle */}
-        <div className="flex justify-center pt-3 flex-shrink-0">
-          <div className="h-1 w-10 rounded-full bg-[#2d2d3a]" />
+        <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 12, flexShrink: 0 }}>
+          <div style={{ height: 4, width: 40, background: 'var(--neutral-300)' }} />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[#1e1e2e] flex-shrink-0">
-          <h2 className="text-white font-bold text-base">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderBottom: '1px solid var(--divider)', flexShrink: 0 }}>
+          <div style={{ fontWeight: 800, fontSize: 15 }}>
             {initial ? 'Modifica scheda' : 'Nuova scheda'}
-          </h2>
-          <button onClick={onClose} className="text-slate-500 hover:text-white p-1">
+          </div>
+          <button onClick={onClose} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
             <X size={18} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto flex-1 p-4 space-y-4">
+        <div style={{ overflowY: 'auto', flex: 1, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Name */}
           <div>
-            <label className="text-xs text-slate-400 mb-1 block">Nome scheda *</label>
+            <label className="k" style={{ display: 'block', marginBottom: 4 }}>Nome scheda *</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Es. Petto e Bicipiti"
-              className="w-full rounded-xl bg-[#0a0a0f] border border-[#2d2d3a] px-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500"
+              className="input"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="text-xs text-slate-400 mb-1 block">Descrizione</label>
+            <label className="k" style={{ display: 'block', marginBottom: 4 }}>Descrizione</label>
             <input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Es. Focus ipertrofia, esercizi composti..."
-              className="w-full rounded-xl bg-[#0a0a0f] border border-[#2d2d3a] px-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500"
+              className="input"
             />
           </div>
 
           {/* Duration */}
           <div>
-            <label className="text-xs text-slate-400 mb-1 block">Durata stimata (minuti)</label>
+            <label className="k" style={{ display: 'block', marginBottom: 4 }}>Durata stimata (minuti)</label>
             <input
               type="number"
               min={1}
               value={estimatedMinutes}
               onChange={(e) => setEstimatedMinutes(parseInt(e.target.value) || 60)}
-              className="w-32 rounded-xl bg-[#0a0a0f] border border-[#2d2d3a] px-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500"
+              className="input"
+              style={{ width: 120 }}
             />
           </div>
 
           {/* Muscle groups */}
           <div>
-            <label className="text-xs text-slate-400 mb-2 block">Gruppi muscolari</label>
-            <div className="flex flex-wrap gap-2">
+            <label className="k" style={{ display: 'block', marginBottom: 8 }}>Gruppi muscolari</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {ALL_MUSCLE_GROUPS.map((m) => (
                 <button
                   key={m}
                   onClick={() => toggleMuscle(m)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium border transition-colors ${
-                    muscleGroups.includes(m)
-                      ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300'
-                      : 'bg-[#0a0a0f] border-[#2d2d3a] text-slate-500 hover:border-[#3d3d4a]'
-                  }`}
+                  style={{
+                    border: '1px solid var(--divider)', padding: '5px 10px',
+                    fontFamily: 'Archivo, system-ui', fontWeight: 800, fontSize: 10,
+                    letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer',
+                    background: muscleGroups.includes(m) ? 'var(--accent)' : 'transparent',
+                    color: muscleGroups.includes(m) ? 'var(--bg)' : 'var(--muted)',
+                    borderColor: muscleGroups.includes(m) ? 'var(--accent)' : 'var(--divider)',
+                  }}
                 >
                   {m}
                 </button>
@@ -146,91 +149,89 @@ export default function CustomWorkoutEditor({ initial, onSave, onClose }: Props)
 
           {/* Exercises */}
           <div>
-            <label className="text-xs text-slate-400 mb-2 block">
+            <label className="k" style={{ display: 'block', marginBottom: 8 }}>
               Esercizi ({exercises.length})
             </label>
-            <div className="space-y-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {exercises.map((ex, idx) => (
                 <div
                   key={ex.id}
-                  className="rounded-xl border border-[#1e1e2e] bg-[#0a0a0f] overflow-hidden"
+                  style={{ border: '1px solid var(--divider)', background: 'var(--surface)', overflow: 'hidden' }}
                 >
                   {/* Exercise header row */}
                   <button
-                    className="w-full flex items-center gap-2 px-3 py-2.5 text-left"
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer' }}
                     onClick={() => setExpandedIdx(expandedIdx === idx ? -1 : idx)}
                   >
-                    <span className="text-slate-600 text-xs font-mono w-4 flex-shrink-0">
+                    <span style={{ color: 'var(--muted)', fontSize: 11, fontWeight: 800, width: 16, flexShrink: 0 }}>
                       {idx + 1}
                     </span>
                     <span
-                      className={`flex-1 text-sm font-medium truncate ${
-                        ex.name ? 'text-white' : 'text-slate-600'
-                      }`}
+                      style={{ flex: 1, fontSize: 13, fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: ex.name ? 'var(--text)' : 'var(--muted)' }}
                     >
                       {ex.name || 'Nuovo esercizio'}
                     </span>
-                    <span className="text-xs text-slate-600 flex-shrink-0">
+                    <span className="k" style={{ flexShrink: 0 }}>
                       {ex.defaultSets}×{ex.defaultReps}
                     </span>
                     {expandedIdx === idx ? (
-                      <ChevronUp size={14} className="text-slate-500 flex-shrink-0" />
+                      <ChevronUp size={13} style={{ color: 'var(--muted)', flexShrink: 0 }} />
                     ) : (
-                      <ChevronDown size={14} className="text-slate-500 flex-shrink-0" />
+                      <ChevronDown size={13} style={{ color: 'var(--muted)', flexShrink: 0 }} />
                     )}
                   </button>
 
                   {/* Expanded form */}
                   {expandedIdx === idx && (
-                    <div className="px-3 pb-3 space-y-3 border-t border-[#1e1e2e] pt-3">
+                    <div style={{ padding: '12px', borderTop: '1px solid var(--divider)', display: 'flex', flexDirection: 'column', gap: 10 }}>
                       {/* Name */}
                       <input
                         value={ex.name}
                         onChange={(e) => updateEx(idx, 'name', e.target.value)}
                         placeholder="Nome esercizio *"
-                        className="w-full rounded-xl bg-[#111118] border border-[#2d2d3a] px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
+                        className="input"
+                        style={{ background: 'var(--bg)' }}
                       />
 
                       {/* Serie / Rip / Recupero */}
-                      <div className="grid grid-cols-3 gap-2">
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
                         <div>
-                          <label className="text-xs text-slate-600 block mb-1">Serie</label>
+                          <label className="k" style={{ display: 'block', marginBottom: 4 }}>Serie</label>
                           <input
                             type="number"
                             min={1}
                             value={ex.defaultSets}
-                            onChange={(e) =>
-                              updateEx(idx, 'defaultSets', parseInt(e.target.value) || 1)
-                            }
-                            className="w-full rounded-xl bg-[#111118] border border-[#2d2d3a] px-2 py-2 text-white text-sm text-center focus:outline-none focus:border-indigo-500"
+                            onChange={(e) => updateEx(idx, 'defaultSets', parseInt(e.target.value) || 1)}
+                            className="input"
+                            style={{ textAlign: 'center', background: 'var(--bg)' }}
                           />
                         </div>
                         <div>
-                          <label className="text-xs text-slate-600 block mb-1">Ripetizioni</label>
+                          <label className="k" style={{ display: 'block', marginBottom: 4 }}>Ripetizioni</label>
                           <input
                             value={ex.defaultReps}
                             onChange={(e) => updateEx(idx, 'defaultReps', e.target.value)}
                             placeholder="8-10"
-                            className="w-full rounded-xl bg-[#111118] border border-[#2d2d3a] px-2 py-2 text-white text-sm text-center focus:outline-none focus:border-indigo-500"
+                            className="input"
+                            style={{ textAlign: 'center', background: 'var(--bg)' }}
                           />
                         </div>
                         <div>
-                          <label className="text-xs text-slate-600 block mb-1">Rec. (s)</label>
+                          <label className="k" style={{ display: 'block', marginBottom: 4 }}>Rec. (s)</label>
                           <input
                             type="number"
                             min={0}
                             value={ex.restSeconds}
-                            onChange={(e) =>
-                              updateEx(idx, 'restSeconds', parseInt(e.target.value) || 0)
-                            }
-                            className="w-full rounded-xl bg-[#111118] border border-[#2d2d3a] px-2 py-2 text-white text-sm text-center focus:outline-none focus:border-indigo-500"
+                            onChange={(e) => updateEx(idx, 'restSeconds', parseInt(e.target.value) || 0)}
+                            className="input"
+                            style={{ textAlign: 'center', background: 'var(--bg)' }}
                           />
                         </div>
                       </div>
 
                       {/* Instructions */}
                       <div>
-                        <label className="text-xs text-slate-400 block mb-1">
+                        <label className="k" style={{ display: 'block', marginBottom: 4 }}>
                           Come eseguire — tecnica e forma corretta
                         </label>
                         <textarea
@@ -238,20 +239,21 @@ export default function CustomWorkoutEditor({ initial, onSave, onClose }: Props)
                           onChange={(e) => updateEx(idx, 'instructions', e.target.value)}
                           placeholder="Posizione di partenza, traiettoria del movimento, punti chiave, errori da evitare..."
                           rows={3}
-                          className="w-full rounded-xl bg-[#111118] border border-[#2d2d3a] px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500 resize-none"
+                          style={{ width: '100%', border: '1px solid var(--divider)', padding: '6px 10px', fontSize: 13, color: 'var(--text)', background: 'var(--bg)', fontFamily: 'Archivo, system-ui', resize: 'none', outline: 'none' }}
                         />
                       </div>
 
                       {/* Tips / pesi */}
                       <div>
-                        <label className="text-xs text-slate-400 block mb-1">
+                        <label className="k" style={{ display: 'block', marginBottom: 4 }}>
                           Note / Pesi (opzionale)
                         </label>
                         <input
                           value={ex.tips ?? ''}
                           onChange={(e) => updateEx(idx, 'tips', e.target.value)}
                           placeholder="Es. 40kg × 8 poi dropset 30kg × 5"
-                          className="w-full rounded-xl bg-[#111118] border border-[#2d2d3a] px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
+                          className="input"
+                          style={{ background: 'var(--bg)' }}
                         />
                       </div>
 
@@ -259,7 +261,7 @@ export default function CustomWorkoutEditor({ initial, onSave, onClose }: Props)
                       {exercises.length > 1 && (
                         <button
                           onClick={() => removeExercise(idx)}
-                          className="flex items-center gap-1.5 text-red-400 text-xs hover:text-red-300 transition-colors"
+                          style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--accent)', fontSize: 12, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                         >
                           <Trash2 size={12} />
                           Rimuovi esercizio
@@ -274,20 +276,21 @@ export default function CustomWorkoutEditor({ initial, onSave, onClose }: Props)
             {/* Add exercise */}
             <button
               onClick={addExercise}
-              className="mt-2 w-full rounded-xl border border-dashed border-[#2d2d3a] py-3 text-sm text-slate-500 hover:text-indigo-400 hover:border-indigo-500/40 flex items-center justify-center gap-2 transition-colors"
+              style={{ marginTop: 8, width: '100%', border: '1px dashed var(--divider)', padding: '12px 0', fontSize: 12, color: 'var(--muted)', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: 'Archivo, system-ui', fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase' }}
             >
-              <Plus size={14} />
+              <Plus size={13} />
               Aggiungi esercizio
             </button>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-4 border-t border-[#1e1e2e] flex-shrink-0">
+        <div style={{ padding: '16px 20px', borderTop: '1px solid var(--divider)', flexShrink: 0 }}>
           <button
             onClick={handleSave}
             disabled={!name.trim() || validExercises.length === 0}
-            className="w-full rounded-2xl bg-indigo-600 py-3.5 text-white font-bold text-base disabled:opacity-40 disabled:cursor-not-allowed hover:bg-indigo-500 transition-colors"
+            className="btn btn-primary btn-block"
+            style={{ minHeight: 50, fontSize: 15 }}
           >
             {initial ? 'Salva modifiche' : 'Crea scheda'}
           </button>

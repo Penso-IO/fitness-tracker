@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useStore } from '@/lib/store'
 import { NUTRITION_TARGETS } from '@/lib/store'
 import { formatDate, todayStr } from '@/lib/utils'
-import { Plus, Trash2, Droplets, Flame, ChevronDown, ChevronUp, BookOpen, Target, Zap, ChefHat } from 'lucide-react'
+import { Plus, Trash2, Droplets, Flame, ChevronDown, ChevronUp, BookOpen, Zap, ChefHat } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
 // ── Meal plan reference (from ClickUp) ────────────────────────────
@@ -346,25 +346,17 @@ const CATEGORY_LABELS: Record<RecipeCategory, string> = {
   'spuntino': 'Spuntino',
 }
 
-const CATEGORY_COLORS: Record<RecipeCategory, string> = {
-  'colazione': 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
-  'pre-workout': 'text-orange-400 bg-orange-500/10 border-orange-500/20',
-  'post-workout': 'text-green-400 bg-green-500/10 border-green-500/20',
-  'pasto': 'text-blue-400 bg-blue-500/10 border-blue-500/20',
-  'spuntino': 'text-purple-400 bg-purple-500/10 border-purple-500/20',
-}
-
 // ── Sub-components ─────────────────────────────────────────────────
 function MacroBar({ label, value, target, unit, color }: { label: string; value: number; target: number; unit: string; color: string }) {
   const pct = Math.min(100, Math.round((value / target) * 100))
   return (
     <div>
-      <div className="flex justify-between text-xs mb-1">
-        <span className={color}>{label}</span>
-        <span className="text-slate-400">{value}{unit} / {target}{unit}</span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+        <span style={{ fontFamily: 'Archivo, system-ui', fontWeight: 800, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color }}>{label}</span>
+        <span style={{ fontSize: 11, color: 'var(--muted)' }}>{value}{unit} / {target}{unit}</span>
       </div>
-      <div className="h-1.5 rounded-full bg-[#1e1e2e]">
-        <div className={`h-1.5 rounded-full transition-all ${color.replace('text-', 'bg-')}`} style={{ width: `${pct}%` }} />
+      <div style={{ height: 6, background: 'var(--neutral-300)' }}>
+        <div style={{ height: 6, background: color, width: `${pct}%`, transition: 'width 0.3s' }} />
       </div>
     </div>
   )
@@ -372,47 +364,44 @@ function MacroBar({ label, value, target, unit, color }: { label: string; value:
 
 function RecipeCard({ recipe }: { recipe: Recipe }) {
   const [open, setOpen] = useState(false)
-  const catCls = CATEGORY_COLORS[recipe.category]
 
   return (
-    <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] overflow-hidden">
-      <button className="w-full p-4 text-left" onClick={() => setOpen(v => !v)}>
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-start gap-3 min-w-0">
-            <span className="text-2xl flex-shrink-0">{recipe.emoji}</span>
-            <div className="min-w-0">
-              <p className="text-white font-semibold text-sm leading-tight">{recipe.name}</p>
-              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${catCls}`}>
-                  {CATEGORY_LABELS[recipe.category]}
-                </span>
-                <span className="text-slate-500 text-xs">{recipe.prepTime}</span>
+    <div style={{ border: '1px solid var(--divider)', background: 'var(--surface)', overflow: 'hidden' }}>
+      <button style={{ width: '100%', padding: '14px 16px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setOpen(v => !v)}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, minWidth: 0 }}>
+            <span style={{ fontSize: 20, flexShrink: 0 }}>{recipe.emoji}</span>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontWeight: 800, fontSize: 13, lineHeight: 1.3, color: 'var(--text)' }}>{recipe.name}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5, flexWrap: 'wrap' }}>
+                <span className="tag tag-accent">{CATEGORY_LABELS[recipe.category]}</span>
+                <span style={{ fontSize: 11, color: 'var(--muted)' }}>{recipe.prepTime}</span>
               </div>
             </div>
           </div>
-          <div className="flex-shrink-0 flex items-center gap-1.5">
-            <span className="text-orange-400 text-sm font-bold">{recipe.kcal}</span>
-            <span className="text-orange-400 text-xs">kcal</span>
-            {open ? <ChevronUp size={14} className="text-slate-500 ml-1" /> : <ChevronDown size={14} className="text-slate-500 ml-1" />}
+          <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontWeight: 800, fontSize: 14, color: 'var(--accent)' }}>{recipe.kcal}</span>
+            <span className="k">kcal</span>
+            {open ? <ChevronUp size={14} style={{ color: 'var(--muted)' }} /> : <ChevronDown size={14} style={{ color: 'var(--muted)' }} />}
           </div>
         </div>
-        <div className="flex gap-4 mt-2 text-xs">
-          <span className="text-blue-400">P {recipe.protein}g</span>
-          <span className="text-yellow-400">C {recipe.carbs}g</span>
-          <span className="text-pink-400">G {recipe.fat}g</span>
+        <div style={{ display: 'flex', gap: 14, marginTop: 8 }}>
+          <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text)' }}>P {recipe.protein}g</span>
+          <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--muted)' }}>C {recipe.carbs}g</span>
+          <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--muted)' }}>G {recipe.fat}g</span>
         </div>
       </button>
 
       {open && (
-        <div className="border-t border-[#1e1e2e] p-4 space-y-4">
+        <div style={{ borderTop: '1px solid var(--divider)', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Ingredients */}
           <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Ingredienti</p>
-            <div className="grid grid-cols-1 gap-1">
+            <div className="k" style={{ marginBottom: 8 }}>Ingredienti</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               {recipe.ingredients.map((ing, i) => (
-                <div key={i} className="flex items-center gap-2 text-sm">
-                  <span className="text-indigo-400 font-medium w-16 flex-shrink-0 text-xs">{ing.qty}</span>
-                  <span className="text-slate-300">{ing.item}</span>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+                  <span style={{ color: 'var(--accent-dark)', fontWeight: 800, width: 56, flexShrink: 0, fontSize: 11 }}>{ing.qty}</span>
+                  <span style={{ color: 'var(--text)' }}>{ing.item}</span>
                 </div>
               ))}
             </div>
@@ -420,11 +409,11 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
 
           {/* Steps */}
           <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Preparazione</p>
-            <ol className="space-y-2">
+            <div className="k" style={{ marginBottom: 8 }}>Preparazione</div>
+            <ol style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingLeft: 0, margin: 0, listStyle: 'none' }}>
               {recipe.steps.map((step, i) => (
-                <li key={i} className="flex gap-2 text-sm text-slate-300">
-                  <span className="text-indigo-400 font-bold flex-shrink-0">{i + 1}.</span>
+                <li key={i} style={{ display: 'flex', gap: 8, fontSize: 13, color: 'var(--text)' }}>
+                  <span style={{ color: 'var(--accent)', fontWeight: 800, flexShrink: 0 }}>{i + 1}.</span>
                   <span>{step}</span>
                 </li>
               ))}
@@ -432,9 +421,9 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
           </div>
 
           {/* Book note */}
-          <div className="flex gap-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 p-3">
-            <BookOpen size={13} className="text-indigo-400 flex-shrink-0 mt-0.5" />
-            <p className="text-indigo-300 text-xs leading-relaxed">{recipe.bookNote}</p>
+          <div style={{ display: 'flex', gap: 8, border: '1px solid var(--divider)', background: 'var(--bg)', padding: 12 }}>
+            <BookOpen size={12} style={{ color: 'var(--muted)', flexShrink: 0, marginTop: 1 }} />
+            <div style={{ fontSize: 11, color: 'var(--muted)', lineHeight: 1.5 }}>{recipe.bookNote}</div>
           </div>
         </div>
       )}
@@ -502,366 +491,373 @@ export default function NutritionPage() {
 
   const filteredRecipes = recipeCat === 'tutti' ? RECIPES : RECIPES.filter(r => r.category === recipeCat)
 
+  const chartStyle = { background: 'var(--bg)', border: '1px solid var(--divider)', borderRadius: 0, color: 'var(--text)', fontSize: 11 }
+
+  // Water glass tracker: 8 glasses (each ~250ml = 2L total)
+  const totalGlasses = 8
+  const filledGlasses = Math.min(totalGlasses, Math.round((waterToday / NUTRITION_TARGETS.water) * totalGlasses))
+
   return (
-    <div className="px-4 pt-6 pb-4 space-y-5">
+    <div style={{ paddingBottom: 26 }}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div style={{ padding: '58px 20px 14px', borderBottom: '2px solid rgba(32,30,29,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <h1 className="text-2xl font-bold text-white">Nutrizione</h1>
-          <p className="text-slate-500 text-sm mt-1">Target: {NUTRITION_TARGETS.calories} kcal · {NUTRITION_TARGETS.protein}g P · {NUTRITION_TARGETS.carbs}g C · {NUTRITION_TARGETS.fat}g G</p>
+          <h1 style={{ fontSize: 28, marginBottom: 4 }}>Nutrizione</h1>
+          <div className="k">Target: {NUTRITION_TARGETS.calories} kcal · {NUTRITION_TARGETS.protein}g P · {NUTRITION_TARGETS.carbs}g C · {NUTRITION_TARGETS.fat}g G</div>
         </div>
         {tab === 'diario' && (
-          <button onClick={() => setShowForm(v => !v)} className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 transition-colors">
-            <Plus size={16} />Aggiungi
+          <button onClick={() => setShowForm(v => !v)} className="btn btn-primary" style={{ fontSize: 12 }}>
+            <Plus size={14} />Aggiungi
           </button>
         )}
       </div>
 
       {/* Tab navigation */}
-      <div className="flex rounded-xl bg-[#111118] border border-[#1e1e2e] p-1 gap-1">
+      <div style={{ display: 'flex', borderBottom: '2px solid rgba(32,30,29,0.4)' }}>
         {([['diario', 'Diario'], ['settimana', '7 Giorni'], ['ricette', 'Ricette']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setTab(key)}
-            className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
-              tab === key
-                ? 'bg-indigo-600 text-white shadow'
-                : 'text-slate-400 hover:text-white'
-            }`}
+            style={{
+              flex: 1, padding: '12px 0', fontFamily: 'Archivo, system-ui', fontWeight: 800, fontSize: 11,
+              letterSpacing: '0.08em', textTransform: 'uppercase',
+              background: 'none', border: 'none', borderBottom: tab === key ? '2px solid var(--accent)' : '2px solid transparent',
+              marginBottom: -2, cursor: 'pointer',
+              color: tab === key ? 'var(--accent)' : 'var(--muted)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+            }}
           >
-            {key === 'ricette' ? <span className="flex items-center justify-center gap-1.5"><ChefHat size={13} />{label}</span> : label}
+            {key === 'ricette' && <ChefHat size={12} />}{label}
           </button>
         ))}
       </div>
 
-      {/* ── DIARIO TAB ─────────────────────────────────────────── */}
-      {tab === 'diario' && (
-        <>
-          {/* Water Tracker */}
-          <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Droplets size={16} className="text-cyan-400" />
-                <span className="text-sm font-semibold text-white">Acqua</span>
+      <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+        {/* ── DIARIO TAB ─────────────────────────────────────────── */}
+        {tab === 'diario' && (
+          <>
+            {/* Water Tracker */}
+            <div style={{ border: '1px solid var(--divider)', padding: '14px 16px', background: 'var(--surface)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Droplets size={15} style={{ color: 'var(--text)' }} />
+                  <span style={{ fontWeight: 800, fontSize: 14 }}>Acqua</span>
+                </div>
+                <span style={{ fontWeight: 800, fontSize: 16, color: 'var(--accent)' }}>
+                  {(waterToday * 1000).toFixed(0)}ml
+                </span>
               </div>
-              <span className="text-cyan-400 font-bold text-base">
-                {(waterToday * 1000).toFixed(0)}ml
-              </span>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                  <span className="k">{(waterToday * 1000).toFixed(0)} ml bevuti</span>
+                  <span className="k">{NUTRITION_TARGETS.water * 1000} ml target</span>
+                </div>
+                {/* Water rectangles */}
+                <div style={{ display: 'flex', gap: 3 }}>
+                  {Array.from({ length: totalGlasses }).map((_, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        flex: 1, height: 20,
+                        background: i < filledGlasses ? 'var(--text)' : 'var(--neutral-300)',
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+                {([
+                  { label: '+100ml', value: 0.1 },
+                  { label: '+250ml', value: 0.25 },
+                  { label: '+330ml', value: 0.33 },
+                  { label: '+500ml', value: 0.5 },
+                ] as const).map(({ label, value }) => (
+                  <button
+                    key={label}
+                    onClick={() => addWater(value)}
+                    className="btn btn-secondary"
+                    style={{ fontSize: 10, padding: '6px 4px', letterSpacing: '0.04em' }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {waterToday >= NUTRITION_TARGETS.water && (
+                <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--accent-dark)', fontWeight: 800 }}>Target raggiunto!</div>
+              )}
             </div>
-            <div>
-              <div className="flex justify-between text-xs text-slate-500 mb-1.5">
-                <span>{(waterToday * 1000).toFixed(0)} ml bevuti</span>
-                <span>{NUTRITION_TARGETS.water * 1000} ml target</span>
+
+            {/* Today progress */}
+            {todayEntry && (
+              <div style={{ border: '1px solid var(--divider)', padding: '14px 16px', background: 'var(--surface)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <span className="k">Oggi</span>
+                <MacroBar label="Calorie" value={todayEntry.calories} target={NUTRITION_TARGETS.calories} unit=" kcal" color="var(--accent)" />
+                <MacroBar label="Proteine" value={todayEntry.protein} target={NUTRITION_TARGETS.protein} unit="g" color="var(--text)" />
+                <MacroBar label="Carboidrati" value={todayEntry.carbs} target={NUTRITION_TARGETS.carbs} unit="g" color="var(--neutral-700)" />
+                <MacroBar label="Grassi" value={todayEntry.fat} target={NUTRITION_TARGETS.fat} unit="g" color="var(--neutral-600)" />
+                {todayEntry.water > 0 && (
+                  <MacroBar label="Acqua" value={todayEntry.water} target={NUTRITION_TARGETS.water} unit="L" color="var(--accent-dark)" />
+                )}
               </div>
-              <div className="h-3 rounded-full bg-[#1e1e2e] overflow-hidden">
-                <div
-                  className="h-3 rounded-full bg-gradient-to-r from-cyan-600 to-cyan-400 transition-all duration-500"
-                  style={{ width: `${Math.min(100, (waterToday / NUTRITION_TARGETS.water) * 100)}%` }}
-                />
+            )}
+
+            {/* Add form */}
+            {showForm && (
+              <div style={{ border: '1px solid var(--divider)', padding: '14px 16px', background: 'var(--surface)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ fontWeight: 800, fontSize: 15 }}>Registra giorno</div>
+                  <button onClick={usePlan} className="btn btn-secondary" style={{ fontSize: 11, gap: 4 }}>
+                    <Zap size={11} />Usa piano
+                  </button>
+                </div>
+                <div>
+                  <label className="k" style={{ display: 'block', marginBottom: 4 }}>Data</label>
+                  <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="input" />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  {([
+                    { label: 'Calorie', field: 'calories' as const, unit: 'kcal', color: 'var(--accent)' },
+                    { label: 'Proteine', field: 'protein' as const, unit: 'g', color: 'var(--text)' },
+                    { label: 'Carboidrati', field: 'carbs' as const, unit: 'g', color: 'var(--neutral-700)' },
+                    { label: 'Grassi', field: 'fat' as const, unit: 'g', color: 'var(--neutral-600)' },
+                  ] as const).map(({ label, field, unit, color }) => (
+                    <div key={field}>
+                      <label style={{ fontFamily: 'Archivo, system-ui', fontWeight: 800, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color, display: 'block', marginBottom: 4 }}>{label}</label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <input type="number" value={form[field]} onChange={(e) => setForm({ ...form, [field]: e.target.value })} placeholder="0" className="input" style={{ flex: 1 }} />
+                        <span className="k">{unit}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <label className="k" style={{ display: 'block', marginBottom: 4, color: 'var(--accent-dark)' }}>Acqua</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <input type="number" value={form.water} onChange={(e) => setForm({ ...form, water: e.target.value })} placeholder="0" className="input" style={{ flex: 1 }} />
+                    <span className="k">L</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="k" style={{ display: 'block', marginBottom: 4 }}>Note</label>
+                  <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                    placeholder="Pasto cheat? Digiuno? Integrazione?" rows={2}
+                    style={{ width: '100%', border: '1px solid var(--divider)', padding: '6px 10px', fontSize: 13, color: 'var(--text)', background: 'var(--bg)', fontFamily: 'Archivo, system-ui', resize: 'none', outline: 'none' }} />
+                </div>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button onClick={() => setShowForm(false)} className="btn btn-secondary" style={{ flex: 1, minHeight: 44 }}>Annulla</button>
+                  <button onClick={handleAdd} className="btn btn-primary" style={{ flex: 1, minHeight: 44 }}>Salva</button>
+                </div>
+              </div>
+            )}
+
+            {/* Piano Alimentare */}
+            <div style={{ border: '1px solid var(--divider)', background: 'var(--surface)', overflow: 'hidden' }}>
+              <button onClick={() => setShowPlan(v => !v)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <BookOpen size={14} style={{ color: 'var(--muted)' }} />
+                  <span style={{ fontWeight: 800, fontSize: 13 }}>Piano Alimentare Tipo</span>
+                  <span className="k">~2400 kcal</span>
+                </div>
+                {showPlan ? <ChevronUp size={15} style={{ color: 'var(--muted)' }} /> : <ChevronDown size={15} style={{ color: 'var(--muted)' }} />}
+              </button>
+              {showPlan && (
+                <div style={{ borderTop: '1px solid var(--divider)' }}>
+                  {MEALS.map((meal, i) => (
+                    <div key={meal.name} style={{ padding: '12px 16px', borderBottom: i < MEALS.length - 1 ? '1px solid var(--divider)' : 'none' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 16 }}>{meal.emoji}</span>
+                          <div>
+                            <span style={{ fontWeight: 800, fontSize: 13 }}>{meal.name}</span>
+                            <span className="k" style={{ marginLeft: 8 }}>{meal.time}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <span style={{ fontWeight: 800, fontSize: 13, color: 'var(--accent)' }}>~{meal.kcal}</span>
+                          <span className="k" style={{ marginLeft: 3 }}>kcal</span>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: 12, marginBottom: 6 }}>
+                        <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text)' }}>P {meal.p}g</span>
+                        <span style={{ fontSize: 11, color: 'var(--muted)' }}>C {meal.c}g</span>
+                        <span style={{ fontSize: 11, color: 'var(--muted)' }}>G {meal.f}g</span>
+                      </div>
+                      <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {meal.items.map((item, j) => (
+                          <li key={j} style={{ fontSize: 11, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ width: 4, height: 4, background: 'var(--neutral-400)', flexShrink: 0, display: 'inline-block' }} />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                  <div style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 6, borderTop: '1px solid var(--divider)' }}>
+                    <Droplets size={13} style={{ color: 'var(--muted)' }} />
+                    <span style={{ fontSize: 11, color: 'var(--muted)' }}>Minimo <strong>2.5L acqua</strong> al giorno · +500ml nei giorni di allenamento</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Log */}
+            {nutritionLog.length === 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 0', color: 'var(--muted)', gap: 12 }}>
+                <Flame size={48} strokeWidth={1} />
+                <div style={{ fontSize: 13 }}>Nessun dato nutrizionale</div>
+                <div style={{ fontSize: 12 }}>Aggiungi il tuo primo giorno</div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <span className="k">Storico</span>
+                {nutritionLog.map((entry) => (
+                  <div key={entry.id} style={{ border: '1px solid var(--divider)', padding: '14px 16px', background: 'var(--surface)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: 14 }}>{formatDate(entry.date)}</div>
+                        {entry.notes && <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{entry.notes}</div>}
+                      </div>
+                      <button onClick={() => deleteNutritionEntry(entry.id)} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+                      {[
+                        { label: 'Kcal', value: entry.calories, color: 'var(--accent)' },
+                        { label: 'Prot.', value: `${entry.protein}g`, color: 'var(--text)' },
+                        { label: 'Carbo', value: `${entry.carbs}g`, color: 'var(--muted)' },
+                        { label: 'Grassi', value: `${entry.fat}g`, color: 'var(--muted)' },
+                      ].map((m) => (
+                        <div key={m.label} style={{ textAlign: 'center', background: 'var(--bg)', border: '1px solid var(--divider)', padding: '8px 4px' }}>
+                          <div style={{ fontWeight: 800, fontSize: 13, color: m.color }}>{m.value}</div>
+                          <div className="k" style={{ marginTop: 3 }}>{m.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                    {entry.water > 0 && (
+                      <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--muted)' }}>
+                        <Droplets size={12} />
+                        <span>{entry.water}L acqua</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ── SETTIMANA TAB ──────────────────────────────────────── */}
+        {tab === 'settimana' && (
+          <>
+            {/* Calorie chart */}
+            <div style={{ border: '1px solid var(--divider)', padding: '14px 16px', background: 'var(--surface)' }}>
+              <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 2 }}>Calorie — ultimi 7 giorni</div>
+              <div className="k" style={{ marginBottom: 12 }}>Target: {NUTRITION_TARGETS.calories} kcal/giorno</div>
+              <ResponsiveContainer width="100%" height={160}>
+                <BarChart data={last7Days} barSize={24}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(32,30,29,0.15)" vertical={false} />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#605d5d', fontSize: 10 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#605d5d', fontSize: 10 }} />
+                  <Tooltip contentStyle={chartStyle} formatter={(v) => [`${v} kcal`, 'Calorie']} />
+                  <Bar dataKey="kcal" fill="var(--accent)" radius={[0, 0, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Protein chart */}
+            <div style={{ border: '1px solid var(--divider)', padding: '14px 16px', background: 'var(--surface)' }}>
+              <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 2 }}>Proteine — ultimi 7 giorni</div>
+              <div className="k" style={{ marginBottom: 12 }}>Target: {NUTRITION_TARGETS.protein}g/giorno</div>
+              <ResponsiveContainer width="100%" height={160}>
+                <BarChart data={last7Days} barSize={24}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(32,30,29,0.15)" vertical={false} />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#605d5d', fontSize: 10 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#605d5d', fontSize: 10 }} />
+                  <Tooltip contentStyle={chartStyle} formatter={(v) => [`${v}g`, 'Proteine']} />
+                  <Bar dataKey="prot" fill="var(--text)" radius={[0, 0, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Water chart */}
+            <div style={{ border: '1px solid var(--divider)', padding: '14px 16px', background: 'var(--surface)' }}>
+              <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 2 }}>Acqua — ultimi 7 giorni</div>
+              <div className="k" style={{ marginBottom: 12 }}>Target: {NUTRITION_TARGETS.water * 1000}ml/giorno</div>
+              <ResponsiveContainer width="100%" height={160}>
+                <BarChart data={last7Days} barSize={24}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(32,30,29,0.15)" vertical={false} />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#605d5d', fontSize: 10 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#605d5d', fontSize: 10 }} />
+                  <Tooltip contentStyle={chartStyle} formatter={(v) => [`${v}ml`, 'Acqua']} />
+                  <Bar dataKey="acqua" fill="var(--neutral-800)" radius={[0, 0, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Summary stats */}
+            <div style={{ border: '1px solid var(--divider)', padding: '14px 16px', background: 'var(--surface)' }}>
+              <span className="k" style={{ display: 'block', marginBottom: 12 }}>Media settimana</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                {(() => {
+                  const filled = last7Days.filter(d => d.kcal > 0)
+                  const avgKcal = filled.length ? Math.round(filled.reduce((s, d) => s + d.kcal, 0) / filled.length) : 0
+                  const avgProt = filled.length ? Math.round(filled.reduce((s, d) => s + d.prot, 0) / filled.length) : 0
+                  const avgAcqua = filled.length ? Math.round(filled.reduce((s, d) => s + d.acqua, 0) / filled.length) : 0
+                  return [
+                    { label: 'Kcal/die', value: avgKcal, unit: '', color: 'var(--accent)' },
+                    { label: 'Prot/die', value: avgProt, unit: 'g', color: 'var(--text)' },
+                    { label: 'Acqua/die', value: avgAcqua, unit: 'ml', color: 'var(--muted)' },
+                  ].map(m => (
+                    <div key={m.label} style={{ textAlign: 'center', background: 'var(--bg)', border: '1px solid var(--divider)', padding: '10px 4px' }}>
+                      <div style={{ fontWeight: 800, fontSize: 16, color: m.color }}>{m.value}{m.unit}</div>
+                      <div className="k" style={{ marginTop: 4 }}>{m.label}</div>
+                    </div>
+                  ))
+                })()}
               </div>
             </div>
-            <div className="grid grid-cols-4 gap-2">
-              {([
-                { label: '+100ml', value: 0.1 },
-                { label: '+250ml', value: 0.25 },
-                { label: '+330ml', value: 0.33 },
-                { label: '+500ml', value: 0.5 },
-              ] as const).map(({ label, value }) => (
+          </>
+        )}
+
+        {/* ── RICETTE TAB ────────────────────────────────────────── */}
+        {tab === 'ricette' && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <BookOpen size={12} style={{ color: 'var(--muted)', flexShrink: 0 }} />
+              <div style={{ fontSize: 11, color: 'var(--muted)' }}>Basate su <strong>Nutrition Pyramid — Eric Helms</strong> · Obiettivo: massa muscolare lean</div>
+            </div>
+
+            {/* Category filter */}
+            <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}>
+              {([['tutti', 'Tutti'], ['colazione', 'Colazione'], ['pre-workout', 'Pre-WO'], ['post-workout', 'Post-WO'], ['pasto', 'Pasto'], ['spuntino', 'Spuntino']] as const).map(([key, label]) => (
                 <button
-                  key={label}
-                  onClick={() => addWater(value)}
-                  className="rounded-xl bg-cyan-500/10 border border-cyan-500/20 py-2.5 text-xs font-semibold text-cyan-400 hover:bg-cyan-500/20 active:scale-95 transition-all"
+                  key={key}
+                  onClick={() => setRecipeCat(key)}
+                  style={{
+                    border: '1px solid var(--divider)', padding: '5px 10px', fontSize: 11, flexShrink: 0,
+                    fontFamily: 'Archivo, system-ui', fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase',
+                    background: recipeCat === key ? 'var(--accent)' : 'transparent',
+                    color: recipeCat === key ? 'var(--bg)' : 'var(--muted)',
+                    borderColor: recipeCat === key ? 'var(--accent)' : 'var(--divider)',
+                    cursor: 'pointer',
+                  }}
                 >
                   {label}
                 </button>
               ))}
             </div>
-            {waterToday >= NUTRITION_TARGETS.water && (
-              <p className="text-center text-xs text-cyan-400 font-medium">🎯 Target raggiunto!</p>
-            )}
-          </div>
 
-          {/* Today progress */}
-          {todayEntry && (
-            <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <Target size={14} className="text-indigo-400" />
-                <span className="text-sm font-semibold text-white">Oggi</span>
-              </div>
-              <MacroBar label="Calorie" value={todayEntry.calories} target={NUTRITION_TARGETS.calories} unit=" kcal" color="text-orange-400" />
-              <MacroBar label="Proteine" value={todayEntry.protein} target={NUTRITION_TARGETS.protein} unit="g" color="text-blue-400" />
-              <MacroBar label="Carboidrati" value={todayEntry.carbs} target={NUTRITION_TARGETS.carbs} unit="g" color="text-yellow-400" />
-              <MacroBar label="Grassi" value={todayEntry.fat} target={NUTRITION_TARGETS.fat} unit="g" color="text-pink-400" />
-              {todayEntry.water > 0 && (
-                <MacroBar label="Acqua" value={todayEntry.water} target={NUTRITION_TARGETS.water} unit="L" color="text-cyan-400" />
-              )}
-            </div>
-          )}
-
-          {/* Add form */}
-          {showForm && (
-            <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-white font-semibold">Registra giorno</h2>
-                <button onClick={usePlan} className="flex items-center gap-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 px-3 py-1.5 text-xs text-indigo-400 hover:bg-indigo-500/20 transition-colors">
-                  <Zap size={12} />Usa piano
-                </button>
-              </div>
-              <div>
-                <label className="text-xs text-slate-400 mb-1 block">Data</label>
-                <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })}
-                  className="w-full rounded-xl bg-[#0a0a0f] border border-[#2d2d3a] px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {([
-                  { label: 'Calorie', field: 'calories' as const, unit: 'kcal', color: 'text-orange-400' },
-                  { label: 'Proteine', field: 'protein' as const, unit: 'g', color: 'text-blue-400' },
-                  { label: 'Carboidrati', field: 'carbs' as const, unit: 'g', color: 'text-yellow-400' },
-                  { label: 'Grassi', field: 'fat' as const, unit: 'g', color: 'text-pink-400' },
-                ] as const).map(({ label, field, unit, color }) => (
-                  <div key={field}>
-                    <label className={`text-xs font-medium ${color} mb-1 block`}>{label}</label>
-                    <div className="flex items-center gap-2">
-                      <input type="number" value={form[field]} onChange={(e) => setForm({ ...form, [field]: e.target.value })} placeholder="0"
-                        className="flex-1 rounded-xl bg-[#0a0a0f] border border-[#2d2d3a] px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500" />
-                      <span className="text-slate-500 text-sm w-8">{unit}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div>
-                <label className="text-xs font-medium text-cyan-400 mb-1 block">Acqua</label>
-                <div className="flex items-center gap-2">
-                  <input type="number" value={form.water} onChange={(e) => setForm({ ...form, water: e.target.value })} placeholder="0"
-                    className="flex-1 rounded-xl bg-[#0a0a0f] border border-[#2d2d3a] px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500" />
-                  <span className="text-slate-500 text-sm w-8">L</span>
-                </div>
-              </div>
-              <div>
-                <label className="text-xs text-slate-400 mb-1 block">Note</label>
-                <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  placeholder="Pasto cheat? Digiuno? Integrazione?" rows={2}
-                  className="w-full rounded-xl bg-[#0a0a0f] border border-[#2d2d3a] px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500 resize-none" />
-              </div>
-              <div className="flex gap-3">
-                <button onClick={() => setShowForm(false)} className="flex-1 rounded-xl border border-[#2d2d3a] py-3 text-slate-400 text-sm">Annulla</button>
-                <button onClick={handleAdd} className="flex-1 rounded-xl bg-indigo-600 py-3 text-white font-medium text-sm hover:bg-indigo-500 transition-colors">Salva</button>
-              </div>
-            </div>
-          )}
-
-          {/* Piano Alimentare */}
-          <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] overflow-hidden">
-            <button onClick={() => setShowPlan(v => !v)} className="w-full flex items-center justify-between px-4 py-3">
-              <div className="flex items-center gap-2">
-                <BookOpen size={16} className="text-indigo-400" />
-                <span className="text-sm font-semibold text-white">Piano Alimentare Tipo</span>
-                <span className="text-xs text-slate-500">~2400 kcal</span>
-              </div>
-              {showPlan ? <ChevronUp size={16} className="text-slate-500" /> : <ChevronDown size={16} className="text-slate-500" />}
-            </button>
-            {showPlan && (
-              <div className="border-t border-[#1e1e2e] divide-y divide-[#1e1e2e]">
-                {MEALS.map((meal) => (
-                  <div key={meal.name} className="px-4 py-3">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{meal.emoji}</span>
-                        <div>
-                          <span className="text-sm font-medium text-white">{meal.name}</span>
-                          <span className="text-slate-500 text-xs ml-2">{meal.time}</span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-orange-400 text-sm font-bold">~{meal.kcal}</span>
-                        <span className="text-orange-400 text-xs"> kcal</span>
-                      </div>
-                    </div>
-                    <div className="flex gap-3 text-xs mb-2">
-                      <span className="text-blue-400">P {meal.p}g</span>
-                      <span className="text-yellow-400">C {meal.c}g</span>
-                      <span className="text-pink-400">G {meal.f}g</span>
-                    </div>
-                    <ul className="space-y-0.5">
-                      {meal.items.map((item, i) => (
-                        <li key={i} className="text-xs text-slate-400 flex items-center gap-1.5">
-                          <span className="h-1 w-1 rounded-full bg-slate-600 flex-shrink-0" />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-                <div className="px-4 py-3 flex items-center gap-2">
-                  <Droplets size={14} className="text-cyan-400" />
-                  <span className="text-xs text-slate-400">Minimo <span className="text-cyan-400 font-medium">2.5L acqua</span> al giorno · +500ml nei giorni di allenamento</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Log */}
-          {nutritionLog.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-slate-600 gap-3">
-              <Flame size={48} strokeWidth={1} />
-              <p className="text-sm">Nessun dato nutrizionale</p>
-              <p className="text-xs">Aggiungi il tuo primo giorno</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <h2 className="text-sm font-semibold text-slate-400">Storico</h2>
-              {nutritionLog.map((entry) => (
-                <div key={entry.id} className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <p className="text-white font-semibold">{formatDate(entry.date)}</p>
-                      {entry.notes && <p className="text-slate-500 text-xs mt-0.5">{entry.notes}</p>}
-                    </div>
-                    <button onClick={() => deleteNutritionEntry(entry.id)} className="text-slate-600 hover:text-red-400 p-1 transition-colors">
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    {[
-                      { label: 'Kcal', value: entry.calories, color: 'text-orange-400' },
-                      { label: 'Prot.', value: `${entry.protein}g`, color: 'text-blue-400' },
-                      { label: 'Carbo', value: `${entry.carbs}g`, color: 'text-yellow-400' },
-                      { label: 'Grassi', value: `${entry.fat}g`, color: 'text-pink-400' },
-                    ].map((m) => (
-                      <div key={m.label} className="text-center rounded-xl bg-[#0a0a0f] py-2">
-                        <p className={`text-base font-bold ${m.color}`}>{m.value}</p>
-                        <p className="text-slate-600 text-xs">{m.label}</p>
-                      </div>
-                    ))}
-                  </div>
-                  {entry.water > 0 && (
-                    <div className="mt-2 flex items-center gap-1 text-xs text-blue-400">
-                      <Droplets size={12} />
-                      <span>{entry.water}L acqua</span>
-                    </div>
-                  )}
-                </div>
+            {/* Recipe cards */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {filteredRecipes.map(recipe => (
+                <RecipeCard key={recipe.id} recipe={recipe} />
               ))}
             </div>
-          )}
-        </>
-      )}
-
-      {/* ── SETTIMANA TAB ──────────────────────────────────────── */}
-      {tab === 'settimana' && (
-        <div className="space-y-4">
-          {/* Calorie chart */}
-          <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4">
-            <h2 className="text-sm font-semibold text-slate-400 mb-1">Calorie — ultimi 7 giorni</h2>
-            <p className="text-xs text-slate-600 mb-3">Target: {NUTRITION_TARGETS.calories} kcal/giorno</p>
-            <ResponsiveContainer width="100%" height={160}>
-              <BarChart data={last7Days} barSize={24}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" vertical={false} />
-                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
-                <Tooltip
-                  contentStyle={{ background: '#111118', border: '1px solid #1e1e2e', borderRadius: 8, color: '#e2e8f0', fontSize: 12 }}
-                  formatter={(v) => [`${v} kcal`, 'Calorie']}
-                />
-                <Bar dataKey="kcal" fill="#f97316" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Protein chart */}
-          <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4">
-            <h2 className="text-sm font-semibold text-slate-400 mb-1">Proteine — ultimi 7 giorni</h2>
-            <p className="text-xs text-slate-600 mb-3">Target: {NUTRITION_TARGETS.protein}g/giorno</p>
-            <ResponsiveContainer width="100%" height={160}>
-              <BarChart data={last7Days} barSize={24}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" vertical={false} />
-                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
-                <Tooltip
-                  contentStyle={{ background: '#111118', border: '1px solid #1e1e2e', borderRadius: 8, color: '#e2e8f0', fontSize: 12 }}
-                  formatter={(v) => [`${v}g`, 'Proteine']}
-                />
-                <Bar dataKey="prot" fill="#60a5fa" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Water chart */}
-          <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4">
-            <h2 className="text-sm font-semibold text-slate-400 mb-1">Acqua — ultimi 7 giorni</h2>
-            <p className="text-xs text-slate-600 mb-3">Target: {NUTRITION_TARGETS.water * 1000}ml/giorno</p>
-            <ResponsiveContainer width="100%" height={160}>
-              <BarChart data={last7Days} barSize={24}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" vertical={false} />
-                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
-                <Tooltip
-                  contentStyle={{ background: '#111118', border: '1px solid #1e1e2e', borderRadius: 8, color: '#e2e8f0', fontSize: 12 }}
-                  formatter={(v) => [`${v}ml`, 'Acqua']}
-                />
-                <Bar dataKey="acqua" fill="#22d3ee" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Summary stats */}
-          <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4">
-            <h2 className="text-sm font-semibold text-slate-400 mb-3">Media settimana</h2>
-            <div className="grid grid-cols-3 gap-3">
-              {(() => {
-                const filled = last7Days.filter(d => d.kcal > 0)
-                const avgKcal = filled.length ? Math.round(filled.reduce((s, d) => s + d.kcal, 0) / filled.length) : 0
-                const avgProt = filled.length ? Math.round(filled.reduce((s, d) => s + d.prot, 0) / filled.length) : 0
-                const avgAcqua = filled.length ? Math.round(filled.reduce((s, d) => s + d.acqua, 0) / filled.length) : 0
-                return [
-                  { label: 'Kcal/die', value: avgKcal, unit: '', color: 'text-orange-400' },
-                  { label: 'Prot/die', value: avgProt, unit: 'g', color: 'text-blue-400' },
-                  { label: 'Acqua/die', value: avgAcqua, unit: 'ml', color: 'text-cyan-400' },
-                ].map(m => (
-                  <div key={m.label} className="text-center rounded-xl bg-[#0a0a0f] py-3">
-                    <p className={`text-lg font-bold ${m.color}`}>{m.value}{m.unit}</p>
-                    <p className="text-slate-600 text-xs mt-0.5">{m.label}</p>
-                  </div>
-                ))
-              })()}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── RICETTE TAB ────────────────────────────────────────── */}
-      {tab === 'ricette' && (
-        <>
-          <div className="flex items-center gap-2">
-            <BookOpen size={13} className="text-indigo-400 flex-shrink-0" />
-            <p className="text-xs text-slate-500">Basate su <span className="text-indigo-400">Nutrition Pyramid — Eric Helms</span> · Obiettivo: massa muscolare lean</p>
-          </div>
-
-          {/* Category filter */}
-          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-            {([['tutti', 'Tutti'], ['colazione', 'Colazione'], ['pre-workout', 'Pre-WO'], ['post-workout', 'Post-WO'], ['pasto', 'Pasto'], ['spuntino', 'Spuntino']] as const).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => setRecipeCat(key)}
-                className={`rounded-full border px-3 py-1.5 text-xs font-medium flex-shrink-0 transition-colors ${
-                  recipeCat === key
-                    ? 'bg-indigo-600 border-indigo-600 text-white'
-                    : 'border-[#2d2d3a] text-slate-400 hover:text-white'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-
-          {/* Recipe cards */}
-          <div className="space-y-3">
-            {filteredRecipes.map(recipe => (
-              <RecipeCard key={recipe.id} recipe={recipe} />
-            ))}
-          </div>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </div>
   )
 }

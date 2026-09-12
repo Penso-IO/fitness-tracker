@@ -1,177 +1,159 @@
 'use client'
 import { useStore } from '@/lib/store'
-import { formatDate, formatDuration, getMuscleEmoji, todayStr } from '@/lib/utils'
-import { Dumbbell, Flame, Droplets, TrendingUp, ChevronRight, BookOpen } from 'lucide-react'
+import { todayStr } from '@/lib/utils'
 import Link from 'next/link'
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
-} from 'recharts'
+import { useRouter } from 'next/navigation'
+
+function getMesoWeek(sessions: any[]) {
+  // Approximate meso week from session count (every 4 sessions = 1 week)
+  const count = sessions.length
+  const week = Math.min(5, Math.floor(count / 4) + 1)
+  return { week, total: 5 }
+}
+
+function getLastWorkoutHoursAgo(sessions: any[]): number | null {
+  if (sessions.length === 0) return null
+  const last = new Date(sessions[0].date + 'T00:00:00')
+  const now = new Date()
+  return Math.floor((now.getTime() - last.getTime()) / (1000 * 60 * 60))
+}
+
+const BOOK_PROGRAMS = [
+  { name: 'Upper/Lower 4gg', source: 'Helms' },
+  { name: 'PPL+ 4gg', source: 'Brunetti' },
+]
+
+const DAYS_OF_WEEK = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato']
 
 export default function Dashboard() {
+  const router = useRouter()
   const sessions = useStore((s) => s.sessions)
-  const nutritionLog = useStore((s) => s.nutritionLog)
-  const progressLog = useStore((s) => s.progressLog)
   const bookTips = useStore((s) => s.bookTips)
   const activeSession = useStore((s) => s.activeSession)
+  const workoutTemplates = useStore((s) => s.workoutTemplates)
+  const customWorkouts = useStore((s) => s.customWorkouts)
+  const startSession = useStore((s) => s.startSession)
 
-  const today = todayStr()
-  const now = new Date()
-  const currentMonth = now.getMonth()
-  const currentYear = now.getFullYear()
-
-  const monthlySessions = sessions.filter((s) => {
-    const d = new Date(s.date)
-    return d.getMonth() === currentMonth && d.getFullYear() === currentYear
-  })
-
-  const todayNutrition = nutritionLog.find((n) => n.date === today)
-  const lastWeight = progressLog[0]?.weight
-
-  const weekDays = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom']
-  const byDay = weekDays.map((label, i) => ({
-    label,
-    count: monthlySessions.filter((s) => {
-      const d = new Date(s.date)
-      return (d.getDay() === 0 ? 6 : d.getDay() - 1) === i
-    }).length,
-  }))
+  const allTemplates = [...customWorkouts, ...workoutTemplates]
+  const { week, total } = getMesoWeek(sessions)
+  const hoursAgo = getLastWorkoutHoursAgo(sessions)
+  const today = new Date()
+  const dayName = DAYS_OF_WEEK[today.getDay()]
+  const deloadIn = total - week
 
   const tip = bookTips.length > 0 ? bookTips[Math.floor(Math.random() * bookTips.length)] : null
 
+  const lastMuscleGroup = sessions[0]?.muscleGroups?.[0]
+  const showSRA = hoursAgo !== null && hoursAgo < 48 && lastMuscleGroup
+
+  const handleStart = (template: any) => {
+    startSession(template, todayStr())
+    router.push('/workout/active')
+  }
+
   return (
-    <div className="px-4 pt-6 pb-4 space-y-6">
+    <div style={{ paddingBottom: 26 }}>
       {/* Header */}
-      <div>
-        <p className="text-slate-500 text-sm">{formatDate(today)}</p>
-        <h1 className="text-2xl font-bold text-white mt-1">FitTracker 💪</h1>
+      <div style={{ padding: '58px 20px 14px', borderBottom: '2px solid rgba(32,30,29,0.4)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <span className="k">Mesociclo · {total} settimane</span>
+          <span className="k" style={{ color: 'var(--accent-dark)' }}>Settimana {week}/{total}</span>
+        </div>
+        <h2 style={{ fontSize: 30, margin: '8px 0 2px' }}>{dayName}</h2>
+        <div style={{ fontSize: 13, color: 'var(--muted)' }}>
+          {deloadIn > 0 ? `Deload tra ${deloadIn} settimane` : 'Settimana di deload'}
+        </div>
+        {/* Progress bar */}
+        <div style={{ display: 'flex', gap: 3, marginTop: 12 }}>
+          {Array.from({ length: total }).map((_, i) => (
+            <div key={i} style={{
+              flex: 1, height: 8,
+              background: i < week ? 'var(--accent)' : 'var(--neutral-300)',
+              outline: i === week - 1 ? '2px solid var(--text)' : 'none',
+              outlineOffset: -2,
+            }} />
+          ))}
+        </div>
       </div>
 
       {/* Active session banner */}
       {activeSession && (
-        <Link href="/workout/active">
-          <div className="rounded-2xl bg-green-500/10 border border-green-500/30 p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="h-3 w-3 rounded-full bg-green-400 animate-pulse" />
-              <div>
-                <p className="text-green-400 font-semibold text-sm">Sessione in corso</p>
-                <p className="text-white font-bold">{activeSession.templateName}</p>
-              </div>
+        <Link href="/workout/active" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <div style={{ margin: '16px 20px', border: '2px solid var(--accent)', background: 'var(--accent-light)', padding: '13px 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div className="k" style={{ color: 'var(--accent-dark)' }}>Sessione in corso</div>
+              <div style={{ fontWeight: 800, fontSize: 15, marginTop: 5 }}>{activeSession.templateName}</div>
             </div>
-            <ChevronRight className="text-green-400" size={20} />
+            <div className="k" style={{ color: 'var(--accent)' }}>Riprendi →</div>
           </div>
         </Link>
       )}
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <StatCard icon={<Dumbbell size={18} className="text-indigo-400" />} label="Questo mese" value={`${monthlySessions.length}`} sub="sessioni" color="indigo" />
-        <StatCard icon={<Flame size={18} className="text-orange-400" />} label="Oggi" value={todayNutrition ? `${todayNutrition.calories}` : '—'} sub="kcal" color="orange" />
-        <StatCard icon={<TrendingUp size={18} className="text-green-400" />} label="Peso" value={lastWeight ? `${lastWeight}` : '—'} sub="kg" color="green" />
+      {/* SRA Warning */}
+      {showSRA && (
+        <div style={{ margin: '16px 20px 0', border: '2px solid var(--accent)', background: 'var(--accent-light)', padding: '13px 15px' }}>
+          <div className="k" style={{ color: 'var(--accent-dark)' }}>SRA · recupero</div>
+          <div style={{ fontSize: 13, lineHeight: 1.45, marginTop: 6 }}>
+            Hai allenato <strong>{lastMuscleGroup}</strong> {hoursAgo}h fa. Helms consiglia 48–72h — valuta un gruppo muscolare diverso oggi.
+          </div>
+        </div>
+      )}
+
+      {/* Le tue schede */}
+      <div style={{ padding: '16px 20px 8px' }}>
+        <span className="k">Le tue schede</span>
       </div>
-
-      {/* Monthly chart */}
-      {monthlySessions.length > 0 && (
-        <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4">
-          <h2 className="text-sm font-semibold text-slate-400 mb-3">Sessioni per giorno della settimana</h2>
-          <ResponsiveContainer width="100%" height={120}>
-            <BarChart data={byDay} barSize={20}>
-              <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11 }} />
-              <YAxis hide />
-              <Tooltip contentStyle={{ background: '#111118', border: '1px solid #1e1e2e', borderRadius: 8, color: '#e2e8f0' }} cursor={{ fill: '#1e1e2e' }} />
-              <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                {byDay.map((entry, i) => (
-                  <Cell key={i} fill={entry.count > 0 ? '#6366f1' : '#1e1e2e'} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+      {allTemplates.length === 0 ? (
+        <div style={{ padding: '20px', borderTop: '1px solid var(--divider)', color: 'var(--muted)', fontSize: 13 }}>
+          Nessuna scheda — vai su Esercizi per crearne una
         </div>
-      )}
-
-      {/* Recent sessions */}
-      {sessions.length > 0 && (
-        <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-400">Ultime sessioni</h2>
-            <Link href="/history" className="text-xs text-indigo-400">Vedi tutte</Link>
-          </div>
-          {sessions.slice(0, 3).map((s) => (
-            <div key={s.id} className="flex items-center justify-between py-2 border-b border-[#1e1e2e] last:border-0">
-              <div className="flex items-center gap-3">
-                <span className="text-xl">{getMuscleEmoji(s.muscleGroups[0])}</span>
-                <div>
-                  <p className="text-white text-sm font-medium">{s.templateName}</p>
-                  <p className="text-slate-500 text-xs">{formatDate(s.date)}</p>
-                </div>
-              </div>
-              <span className="text-slate-400 text-xs">{s.durationMinutes ? formatDuration(s.durationMinutes) : ''}</span>
+      ) : (
+        allTemplates.map((t, i) => (
+          <div key={t.id} style={{ display: 'flex', gap: 12, padding: '12px 20px', borderTop: '1px solid var(--divider)', borderBottom: i === allTemplates.length - 1 ? '1px solid var(--divider)' : 'none', alignItems: 'center', background: i === 0 ? 'var(--neutral-200)' : 'transparent' }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: 15, lineHeight: 1.2 }}>{t.name}</div>
+              <div className="k" style={{ marginTop: 5 }}>{t.exercises.length} esercizi · ~{t.estimatedMinutes} min</div>
             </div>
-          ))}
-        </div>
+            {i === 0 && <span className="tag tag-accent">Consigliata</span>}
+          </div>
+        ))
       )}
 
-      {/* Today nutrition */}
-      {todayNutrition && (
-        <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4">
-          <h2 className="text-sm font-semibold text-slate-400 mb-3">Nutrizione oggi</h2>
-          <div className="grid grid-cols-4 gap-2">
-            {[
-              { label: 'Kcal', value: todayNutrition.calories, color: 'text-orange-400' },
-              { label: 'Proteine', value: `${todayNutrition.protein}g`, color: 'text-blue-400' },
-              { label: 'Carbo', value: `${todayNutrition.carbs}g`, color: 'text-yellow-400' },
-              { label: 'Grassi', value: `${todayNutrition.fat}g`, color: 'text-pink-400' },
-            ].map((m) => (
-              <div key={m.label} className="text-center">
-                <p className={`text-lg font-bold ${m.color}`}>{m.value}</p>
-                <p className="text-slate-500 text-xs">{m.label}</p>
-              </div>
-            ))}
+      {/* Book programs */}
+      <div style={{ padding: '16px 20px 6px' }}><span className="k">Programmi dai libri</span></div>
+      <div style={{ display: 'flex', gap: 10, padding: '0 20px 14px' }}>
+        {BOOK_PROGRAMS.map((p) => (
+          <div key={p.name} style={{ flex: 1, border: '1px solid var(--divider)', padding: '11px 12px' }}>
+            <div style={{ fontWeight: 800, fontSize: 12, lineHeight: 1.25 }}>{p.name}</div>
+            <div className="k" style={{ marginTop: 5 }}>{p.source}</div>
           </div>
-          {todayNutrition.water > 0 && (
-            <div className="mt-3 flex items-center gap-2 text-sm text-blue-400">
-              <Droplets size={14} />
-              <span>{todayNutrition.water}L acqua</span>
-            </div>
-          )}
-        </div>
-      )}
+        ))}
+      </div>
 
       {/* Book tip */}
       {tip && (
-        <div className="rounded-2xl bg-[#111118] border border-[#1e1e2e] p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <BookOpen size={14} className="text-indigo-400" />
-            <span className="text-xs text-indigo-400 font-medium">{tip.book}</span>
-          </div>
-          <p className="text-slate-300 text-sm italic">"{tip.tip}"</p>
+        <div style={{ margin: '0 20px 18px', background: 'var(--text)', color: 'var(--bg)', padding: '14px 16px' }}>
+          <div className="k" style={{ color: 'rgba(243,242,242,0.55)' }}>Tip · settimana {week} · volume</div>
+          <div style={{ fontSize: 13, lineHeight: 1.45, marginTop: 7 }}>"{tip.tip}"</div>
+          <div className="k" style={{ marginTop: 9, color: 'rgba(243,242,242,0.4)' }}>{tip.book}</div>
         </div>
       )}
 
       {/* CTA */}
-      {!activeSession && (
-        <Link href="/workout">
-          <div className="rounded-2xl bg-indigo-600 p-4 flex items-center justify-between hover:bg-indigo-500 transition-colors">
-            <div>
-              <p className="text-white font-bold text-lg">Inizia allenamento</p>
-              <p className="text-indigo-200 text-sm">Scegli la scheda di oggi</p>
-            </div>
-            <Dumbbell size={28} className="text-white" />
-          </div>
-        </Link>
+      {!activeSession && allTemplates.length > 0 && (
+        <div style={{ padding: '0 20px' }}>
+          <button onClick={() => handleStart(allTemplates[0])} className="btn btn-primary btn-block" style={{ minHeight: 50, fontSize: 16 }}>
+            Avvia {allTemplates[0].name}
+          </button>
+        </div>
       )}
-    </div>
-  )
-}
-
-function StatCard({ icon, label, value, sub, color }: {
-  icon: React.ReactNode; label: string; value: string; sub: string; color: 'indigo' | 'orange' | 'green'
-}) {
-  const bg = { indigo: 'bg-indigo-500/10 border-indigo-500/20', orange: 'bg-orange-500/10 border-orange-500/20', green: 'bg-green-500/10 border-green-500/20' }
-  return (
-    <div className={`rounded-2xl border p-3 ${bg[color]}`}>
-      <div className="flex items-center gap-1 mb-2">{icon}<span className="text-xs text-slate-500">{label}</span></div>
-      <p className="text-xl font-bold text-white">{value}</p>
-      <p className="text-xs text-slate-500">{sub}</p>
+      {!activeSession && allTemplates.length === 0 && (
+        <div style={{ padding: '0 20px' }}>
+          <Link href="/workout" className="btn btn-primary btn-block" style={{ minHeight: 50, fontSize: 16 }}>
+            Vai agli Esercizi →
+          </Link>
+        </div>
+      )}
     </div>
   )
 }

@@ -31,58 +31,49 @@ export default function ExerciseInfoModal({ exerciseName, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm"
+      style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', background: 'rgba(32,30,29,0.55)' }}
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg rounded-t-3xl bg-[#111118] border-t border-x border-[#1e1e2e] flex flex-col"
-        style={{ maxHeight: '85dvh' }}
+        style={{ width: '100%', maxWidth: 512, background: 'var(--bg)', borderTop: '2px solid var(--divider)', display: 'flex', flexDirection: 'column', maxHeight: '85dvh' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Handle */}
-        <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-          <div className="h-1 w-10 rounded-full bg-[#2d2d3a]" />
+        <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 12, paddingBottom: 4, flexShrink: 0 }}>
+          <div style={{ height: 4, width: 40, background: 'var(--neutral-300)' }} />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[#1e1e2e] flex-shrink-0">
-          <h3 className="text-white font-bold text-base truncate pr-4">{exerciseName}</h3>
-          <button onClick={onClose} className="text-slate-500 hover:text-white p-1 flex-shrink-0">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderBottom: '1px solid var(--divider)', flexShrink: 0 }}>
+          <div style={{ fontWeight: 800, fontSize: 15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: 16 }}>{exerciseName}</div>
+          <button onClick={onClose} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 4, flexShrink: 0 }}>
             <X size={18} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto flex-1 p-4 space-y-4">
+        <div style={{ overflowY: 'auto', flex: 1, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
           {loading && (
-            <div className="flex flex-col items-center justify-center py-12 gap-3">
-              <Loader2 size={28} className="text-indigo-400 animate-spin" />
-              <p className="text-slate-500 text-sm">Caricamento dati esercizio...</p>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 0', gap: 12 }}>
+              <Loader2 size={28} style={{ color: 'var(--accent)', animation: 'spin 1s linear infinite' }} className="animate-spin" />
+              <div style={{ color: 'var(--muted)', fontSize: 13 }}>Caricamento dati esercizio...</div>
             </div>
           )}
 
           {!loading && data && (
             <>
               {/* Tags */}
-              <div className="flex flex-wrap gap-2">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 {data.category && (
-                  <span className="rounded-full bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 text-xs font-medium text-indigo-400">
-                    {data.category}
-                  </span>
+                  <span className="tag tag-accent">{data.category}</span>
                 )}
                 {data.muscles.map((m) => (
-                  <span
-                    key={m}
-                    className="rounded-full bg-orange-500/10 border border-orange-500/20 px-3 py-1 text-xs text-orange-400"
-                  >
+                  <span key={m} className="tag" style={{ background: 'var(--neutral-200)', color: 'var(--neutral-800)', border: '1px solid var(--divider)' }}>
                     {m}
                   </span>
                 ))}
                 {data.musclesSecondary.map((m) => (
-                  <span
-                    key={m}
-                    className="rounded-full bg-[#1e1e2e] border border-[#2d2d3a] px-3 py-1 text-xs text-slate-400"
-                  >
+                  <span key={m} className="tag tag-neutral">
                     {m} (sec.)
                   </span>
                 ))}
@@ -90,13 +81,13 @@ export default function ExerciseInfoModal({ exerciseName, onClose }: Props) {
 
               {/* Images / animation */}
               {data.images.length > 0 && (
-                <div className="flex gap-3 overflow-x-auto pb-1">
+                <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
                   {data.images.slice(0, 3).map((img, i) => (
                     <img
                       key={i}
                       src={img}
                       alt={data.name}
-                      className="h-44 w-auto rounded-xl flex-shrink-0 bg-white object-contain"
+                      style={{ height: 176, width: 'auto', flexShrink: 0, background: 'white', objectFit: 'contain', border: '1px solid var(--divider)' }}
                     />
                   ))}
                 </div>
@@ -104,22 +95,17 @@ export default function ExerciseInfoModal({ exerciseName, onClose }: Props) {
 
               {/* Description */}
               {data.description && (
-                <div className="rounded-xl bg-[#0a0a0f] border border-[#1e1e2e] p-3">
-                  <p className="text-slate-400 text-sm leading-relaxed">{data.description}</p>
+                <div style={{ border: '1px solid var(--divider)', padding: '12px 14px', background: 'var(--surface)' }}>
+                  <div style={{ color: 'var(--text)', fontSize: 13, lineHeight: 1.55 }}>{data.description}</div>
                 </div>
               )}
 
               {/* Equipment */}
               {data.equipment.length > 0 && (
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs text-slate-500">Attrezzatura:</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span className="k">Attrezzatura:</span>
                   {data.equipment.map((eq) => (
-                    <span
-                      key={eq}
-                      className="rounded-lg bg-[#1e1e2e] border border-[#2d2d3a] px-2 py-1 text-xs text-slate-400"
-                    >
-                      {eq}
-                    </span>
+                    <span key={eq} className="tag tag-neutral">{eq}</span>
                   ))}
                 </div>
               )}
@@ -127,9 +113,9 @@ export default function ExerciseInfoModal({ exerciseName, onClose }: Props) {
           )}
 
           {!loading && !data && (
-            <div className="flex flex-col items-center justify-center py-12 gap-3 text-slate-600">
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 0', gap: 12, color: 'var(--muted)' }}>
               <Dumbbell size={40} strokeWidth={1} />
-              <p className="text-sm">Nessuna demo disponibile per questo esercizio</p>
+              <div style={{ fontSize: 13 }}>Nessuna demo disponibile per questo esercizio</div>
             </div>
           )}
         </div>
