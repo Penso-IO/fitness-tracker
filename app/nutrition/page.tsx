@@ -4,6 +4,7 @@ import { useStore } from '@/lib/store'
 import { NUTRITION_TARGETS } from '@/lib/store'
 import { formatDate, todayStr } from '@/lib/utils'
 import { Plus, Trash2, Droplets, Flame, ChevronDown, ChevronUp, BookOpen, Zap, ChefHat } from 'lucide-react'
+import { useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
 // ── Meal plan reference (from ClickUp) ────────────────────────────
@@ -443,6 +444,20 @@ export default function NutritionPage() {
   const [showPlan, setShowPlan] = useState(false)
   const [recipeCat, setRecipeCat] = useState<RecipeCategory | 'tutti'>('tutti')
   const [form, setForm] = useState({ date: todayStr(), calories: '', protein: '', carbs: '', fat: '', water: '', notes: '' })
+  const [foodQuery, setFoodQuery] = useState('')
+  const [foodResults, setFoodResults] = useState<any[]>([])
+
+  useEffect(() => {
+    if (!foodQuery.trim()) { setFoodResults([]); return }
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(foodQuery)}&search_simple=1&action=process&json=1&page_size=3&lc=it`)
+        const data = await res.json()
+        setFoodResults(data.products?.slice(0, 3) ?? [])
+      } catch { setFoodResults([]) }
+    }, 600)
+    return () => clearTimeout(t)
+  }, [foodQuery])
 
   const today = todayStr()
   const todayEntry = nutritionLog.find((n) => n.date === today)
@@ -537,6 +552,17 @@ export default function NutritionPage() {
         {/* ── DIARIO TAB ─────────────────────────────────────────── */}
         {tab === 'diario' && (
           <>
+            {/* Big kcal heading */}
+            {todayEntry && (
+              <div style={{ padding: '16px 0 14px', borderBottom: '2px solid var(--divider)', marginBottom: 2 }}>
+                <span className="k">Giovedi · giorno di allenamento</span>
+                <h2 style={{ fontSize: 30, margin: '8px 0 2px' }}>{todayEntry.calories} / {NUTRITION_TARGETS.calories} kcal</h2>
+                <div style={{ fontSize: 13, color: 'var(--muted)' }}>
+                  {NUTRITION_TARGETS.calories - todayEntry.calories} kcal rimaste
+                </div>
+              </div>
+            )}
+
             {/* Water Tracker */}
             <div style={{ border: '1px solid var(--divider)', padding: '14px 16px', background: 'var(--surface)', display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -553,16 +579,13 @@ export default function NutritionPage() {
                   <span className="k">{(waterToday * 1000).toFixed(0)} ml bevuti</span>
                   <span className="k">{NUTRITION_TARGETS.water * 1000} ml target</span>
                 </div>
-                {/* Water rectangles */}
-                <div style={{ display: 'flex', gap: 3 }}>
-                  {Array.from({ length: totalGlasses }).map((_, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        flex: 1, height: 20,
-                        background: i < filledGlasses ? 'var(--text)' : 'var(--neutral-300)',
-                      }}
-                    />
+                {/* Water blocks */}
+                <div style={{ display: 'flex', gap: 4, marginTop: 10 }}>
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <div key={i} style={{
+                      flex: 1, height: 26,
+                      background: i < Math.round((waterToday / NUTRITION_TARGETS.water) * 10) ? 'var(--text)' : 'var(--neutral-300)',
+                    }} />
                   ))}
                 </div>
               </div>
@@ -650,6 +673,36 @@ export default function NutritionPage() {
                 </div>
               </div>
             )}
+
+            {/* Food search */}
+            <div style={{ border: '1px solid var(--divider)', background: 'var(--surface)' }}>
+              <div style={{ padding: '14px 20px 10px', borderBottom: '1px solid var(--divider)' }}>
+                <span className="k">Aggiungi alimento</span>
+              </div>
+              <div style={{ padding: '12px 20px 14px', borderBottom: '1px solid var(--divider)', display: 'flex', gap: 8 }}>
+                <input
+                  className="input"
+                  value={foodQuery}
+                  onChange={(e) => setFoodQuery(e.target.value)}
+                  placeholder="Cerca su Open Food Facts..."
+                  style={{ minHeight: 44, fontSize: 15 }}
+                />
+                <button style={{ width: 44, height: 44, border: '1px solid var(--divider)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', cursor: 'pointer', flexShrink: 0 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 5v14M7 5v14M11 5v14M15 5v14M19 5v14"/></svg>
+                </button>
+              </div>
+              {foodResults.map((food: any, i: number) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px', borderBottom: '1px solid var(--divider)', minHeight: 54 }}>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 14, lineHeight: 1.2 }}>{food.product_name ?? 'Prodotto'}</div>
+                    <div className="k" style={{ marginTop: 4 }}>
+                      100g · {Math.round(food.nutriments?.['energy-kcal_100g'] ?? 0)} kcal · {Math.round(food.nutriments?.proteins_100g ?? 0)}P
+                    </div>
+                  </div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                </div>
+              ))}
+            </div>
 
             {/* Piano Alimentare */}
             <div style={{ border: '1px solid var(--divider)', background: 'var(--surface)', overflow: 'hidden' }}>

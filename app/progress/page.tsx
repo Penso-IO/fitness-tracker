@@ -45,6 +45,51 @@ export default function ProgressPage() {
       }))
   }, [sessions, selectedExercise])
 
+  const muscleVolume = useMemo(() => {
+    const now = new Date()
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+    const prevWeekAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
+
+    const recentSessions = sessions.filter((s) => new Date(s.date) >= weekAgo)
+    const prevSessions = sessions.filter((s) => new Date(s.date) >= prevWeekAgo && new Date(s.date) < weekAgo)
+
+    const muscles = ['Petto', 'Schiena', 'Gambe', 'Spalle', 'Braccia'] as const
+    const MUSCLE_MAP: Record<string, string[]> = {
+      'Petto': ['petto'],
+      'Schiena': ['schiena'],
+      'Gambe': ['gambe', 'glutei'],
+      'Spalle': ['spalle'],
+      'Braccia': ['bicipiti', 'tricipiti'],
+    }
+
+    return muscles.map((muscle) => {
+      const groups = MUSCLE_MAP[muscle]
+
+      const recentCount = recentSessions.flatMap((s) => {
+        if (!s.muscleGroups.some((mg) => groups.includes(mg))) return []
+        return s.exercises.flatMap((e) => e.sets.filter((st) => st.completed))
+      }).length
+      const prevCount = prevSessions.flatMap((s) => {
+        if (!s.muscleGroups.some((mg) => groups.includes(mg))) return []
+        return s.exercises.flatMap((e) => e.sets.filter((st) => st.completed))
+      }).length
+
+      return { muscle, count: recentCount, prev: prevCount, delta: recentCount - prevCount }
+    })
+  }, [sessions])
+
+  const maxVolume = Math.max(...muscleVolume.map((m) => m.count), 1)
+  const hasHighVolume = muscleVolume.some((m) => m.delta > 4)
+  const highVolumeMuscle = muscleVolume.find((m) => m.delta > 4)
+
+  const adherence = sessions.length > 0
+    ? Math.round((sessions.filter((s) => {
+        const d = new Date(s.date)
+        const weekAgo = new Date(Date.now() - 28 * 24 * 60 * 60 * 1000)
+        return d >= weekAgo
+      }).length / 16) * 100)
+    : 0
+
   const handleAdd = () => {
     addProgressEntry({
       date: form.date,
@@ -174,6 +219,53 @@ export default function ProgressPage() {
             )}
           </div>
         )}
+
+        {/* Volume settimanale per muscolo */}
+        <div style={{ border: '1px solid var(--divider)', background: 'var(--surface)' }}>
+          <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid var(--divider)' }}>
+            <span className="k">Volume settimanale per muscolo · serie</span>
+          </div>
+          <div style={{ padding: '12px 16px' }}>
+            {muscleVolume.map(({ muscle, count, delta }) => (
+              <div key={muscle} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid var(--divider)' }}>
+                <span className="k" style={{ width: 60 }}>{muscle}</span>
+                <div style={{ flex: 1, height: 16, background: 'var(--neutral-300)' }}>
+                  <div style={{ width: `${Math.round((count / maxVolume) * 100)}%`, height: 16, background: count > 20 ? 'var(--accent)' : 'var(--text)' }} />
+                </div>
+                <span style={{ fontWeight: 800, fontSize: 12, width: 52, textAlign: 'right' }}>
+                  {count} {delta > 0 ? `+${delta}` : delta < 0 ? `-${Math.abs(delta)}` : '--'}
+                </span>
+              </div>
+            ))}
+          </div>
+          {hasHighVolume && (
+            <div style={{ margin: '0 16px 14px', border: '2px solid var(--accent)', background: 'var(--accent-light)', padding: '13px 15px' }}>
+              <div className="k" style={{ color: 'var(--accent-dark)' }}>Volume molto alto — {highVolumeMuscle?.muscle}</div>
+              <div style={{ fontSize: 13, lineHeight: 1.45, marginTop: 6 }}>
+                +{highVolumeMuscle?.delta} serie sulla settimana scorsa. Monitora la qualita delle serie o taglia una serie.
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Sessioni + Aderenza */}
+        <div style={{ display: 'flex', border: '1px solid var(--divider)', borderTop: '2px solid var(--divider)' }}>
+          <div style={{ flex: 1, padding: '14px 20px', borderRight: '2px solid var(--divider)' }}>
+            <div className="k">Sessioni · mesociclo</div>
+            <div style={{ fontWeight: 800, fontSize: 26, lineHeight: 1.1, marginTop: 5 }}>{sessions.length}</div>
+          </div>
+          <div style={{ flex: 1, padding: '14px 20px' }}>
+            <div className="k">Aderenza</div>
+            <div style={{ fontWeight: 800, fontSize: 26, lineHeight: 1.1, marginTop: 5, color: 'var(--accent-dark)' }}>{Math.min(99, adherence)}%</div>
+          </div>
+        </div>
+
+        {/* Storico sessioni */}
+        <div style={{ padding: '0 0 8px' }}>
+          <a href="/history" className="btn btn-secondary btn-block" style={{ minHeight: 48, fontSize: 15, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--divider)' }}>
+            Storico sessioni
+          </a>
+        </div>
 
         {/* Add form */}
         {showForm && (

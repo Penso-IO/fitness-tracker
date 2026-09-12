@@ -47,8 +47,11 @@ interface AppState {
   // Active session
   activeSession: WorkoutSession | null
   startSession: (template: WorkoutTemplate, date: string) => void
-  updateExerciseSet: (exerciseIdx: number, setIdx: number, field: 'reps' | 'weight', value: number) => void
+  updateExerciseSet: (exerciseIdx: number, setIdx: number, field: 'reps' | 'weight' | 'rir', value: number) => void
   toggleSetComplete: (exerciseIdx: number, setIdx: number) => void
+  addExerciseSet: (exerciseIdx: number) => void
+  removeExerciseSet: (exerciseIdx: number) => void
+  updateExerciseNote: (exerciseIdx: number, note: string) => void
   finishSession: (notes?: string) => void
   cancelSession: () => void
 
@@ -152,6 +155,41 @@ export const useStore = create<AppState>()(
                     si !== setIdx ? st : { ...st, completed: !st.completed }
                   ),
                 }
+          )
+          return { activeSession: { ...s.activeSession, exercises } }
+        }),
+
+      addExerciseSet: (exerciseIdx) =>
+        set((s) => {
+          if (!s.activeSession) return s
+          const exercises = s.activeSession.exercises.map((ex, ei) => {
+            if (ei !== exerciseIdx) return ex
+            const next: import('../types').PerformedSet = {
+              setNumber: ex.sets.length + 1,
+              reps: ex.sets[ex.sets.length - 1]?.reps ?? 0,
+              weight: ex.sets[ex.sets.length - 1]?.weight ?? 0,
+              completed: false,
+            }
+            return { ...ex, sets: [...ex.sets, next] }
+          })
+          return { activeSession: { ...s.activeSession, exercises } }
+        }),
+
+      removeExerciseSet: (exerciseIdx) =>
+        set((s) => {
+          if (!s.activeSession) return s
+          const exercises = s.activeSession.exercises.map((ex, ei) => {
+            if (ei !== exerciseIdx || ex.sets.length <= 1) return ex
+            return { ...ex, sets: ex.sets.slice(0, -1) }
+          })
+          return { activeSession: { ...s.activeSession, exercises } }
+        }),
+
+      updateExerciseNote: (exerciseIdx, note) =>
+        set((s) => {
+          if (!s.activeSession) return s
+          const exercises = s.activeSession.exercises.map((ex, ei) =>
+            ei !== exerciseIdx ? ex : { ...ex, notes: note }
           )
           return { activeSession: { ...s.activeSession, exercises } }
         }),

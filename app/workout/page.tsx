@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import { WorkoutTemplate } from '@/types'
@@ -88,7 +88,7 @@ function TemplateCard({
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 800, fontSize: 13, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ex.name}</div>
                 <div className="k" style={{ marginTop: 3 }}>
-                  {ex.defaultSets}×{ex.defaultReps}
+                  {ex.defaultSets}x{ex.defaultReps}
                   {ex.restSeconds > 0 && ` · ${ex.restSeconds}s rec.`}
                 </div>
                 {ex.tips && <div style={{ color: 'var(--accent-dark)', fontSize: 11, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ex.tips}</div>}
@@ -111,11 +111,98 @@ function TemplateCard({
               className="btn btn-primary btn-block"
               style={{ opacity: disabled ? 0.4 : 1 }}
             >
-              Inizia sessione →
+              Inizia sessione -&gt;
             </button>
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function CatalogTab({ templates }: { templates: WorkoutTemplate[] }) {
+  const [q, setQ] = useState('')
+  const [results, setResults] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  const [muscle, setMuscle] = useState('Tutti')
+
+  const MUSCLE_FILTERS = ['Tutti', 'Petto', 'Schiena', 'Spalle', 'Bicipiti', 'Tricipiti', 'Gambe', 'Core']
+
+  const search = async (query: string) => {
+    if (!query.trim()) { setResults([]); return }
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/exercise?q=${encodeURIComponent(query)}`)
+      const data = await res.json()
+      setResults(data.results ?? data ?? [])
+    } catch { setResults([]) }
+    finally { setLoading(false) }
+  }
+
+  useEffect(() => {
+    const t = setTimeout(() => search(q), 400)
+    return () => clearTimeout(t)
+  }, [q])
+
+  const filtered = muscle === 'Tutti' ? results : results.filter((r: any) =>
+    (r.muscles ?? []).some((m: any) => (m.name_en ?? '').toLowerCase().includes(muscle.toLowerCase()))
+  )
+
+  return (
+    <div>
+      {/* Search */}
+      <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--divider)' }}>
+        <div className="k" style={{ marginBottom: 8 }}>wger.de · catalogo esercizi</div>
+        <input
+          className="input"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Cerca esercizio..."
+          style={{ minHeight: 44, fontSize: 15 }}
+        />
+      </div>
+      {/* Muscle filters */}
+      <div style={{ display: 'flex', overflowX: 'auto', borderBottom: '2px solid var(--divider)' }}>
+        {MUSCLE_FILTERS.map((m) => (
+          <button key={m} onClick={() => setMuscle(m)} style={{
+            padding: '11px 14px', border: 'none', borderRight: '1px solid var(--divider)',
+            background: muscle === m ? 'var(--text)' : 'transparent',
+            color: muscle === m ? 'var(--bg)' : 'var(--muted)',
+            fontFamily: 'Archivo, system-ui', fontWeight: 800, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase',
+            cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+          }}>{m}</button>
+        ))}
+      </div>
+      {/* Results */}
+      {loading && <div style={{ padding: '20px', color: 'var(--muted)', fontSize: 13 }}>Caricamento...</div>}
+      {!loading && q && filtered.length === 0 && (
+        <div style={{ padding: '20px', color: 'var(--muted)', fontSize: 13 }}>Nessun risultato per &quot;{q}&quot;</div>
+      )}
+      {!loading && !q && (
+        <div style={{ padding: '20px', color: 'var(--muted)', fontSize: 13 }}>Cerca un esercizio per nome</div>
+      )}
+      {filtered.map((r: any, i: number) => (
+        <div key={r.id ?? i} style={{ display: 'flex', gap: 12, padding: '12px 20px', borderBottom: '1px solid var(--divider)', alignItems: 'center' }}>
+          {/* Thumbnail */}
+          <div style={{ width: 60, height: 44, flexShrink: 0, background: '#2d2b2b', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'repeating-linear-gradient(115deg, #444141 0 8px, #2d2b2b 8px 17px)' }} />
+            <div style={{ position: 'absolute', left: 0, bottom: 0, width: 20, height: 17, background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="#fff"><polygon points="6 3 20 12 6 21" /></svg>
+            </div>
+          </div>
+          {/* Info */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 800, fontSize: 14, lineHeight: 1.25 }}>{r.name ?? r.translations?.[0]?.name ?? 'Esercizio'}</div>
+            <div className="k" style={{ marginTop: 4 }}>
+              {(r.muscles ?? []).map((m: any) => m.name_en ?? m.name ?? '').filter(Boolean).join(' · ') || 'wger.de'}
+            </div>
+          </div>
+          {/* Add button */}
+          <button style={{ width: 44, height: 44, border: '1px solid var(--divider)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', cursor: 'pointer', flexShrink: 0 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          </button>
+        </div>
+      ))}
     </div>
   )
 }
@@ -130,6 +217,7 @@ export default function WorkoutPage() {
   const startSession = useStore((s) => s.startSession)
   const activeSession = useStore((s) => s.activeSession)
 
+  const [tab, setTab] = useState<'schede' | 'catalogo'>('schede')
   const [selectedDate, setSelectedDate] = useState(todayStr())
   const [editorOpen, setEditorOpen] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState<WorkoutTemplate | undefined>()
@@ -172,6 +260,17 @@ export default function WorkoutPage() {
         <div style={{ fontSize: 13, color: 'var(--muted)' }}>Seleziona o crea il tuo allenamento di oggi</div>
       </div>
 
+      {/* Tab selector */}
+      <div style={{ display: 'flex', borderBottom: '2px solid var(--divider)' }}>
+        {(['schede', 'catalogo'] as const).map((t) => (
+          <button key={t} onClick={() => setTab(t)} style={{
+            flex: 1, padding: '12px 0', background: 'none', border: 'none', borderBottom: tab === t ? '2px solid var(--accent)' : '2px solid transparent', marginBottom: -2,
+            fontFamily: 'Archivo, system-ui', fontWeight: 800, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
+            color: tab === t ? 'var(--accent)' : 'var(--muted)', cursor: 'pointer',
+          }}>{t === 'schede' ? 'Le mie schede' : 'Catalogo wger.de'}</button>
+        ))}
+      </div>
+
       {/* Active session banner */}
       {activeSession && (
         <div style={{ margin: '16px 20px', border: '2px solid var(--accent)', background: 'var(--accent-light)', padding: '13px 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -188,83 +287,91 @@ export default function WorkoutPage() {
         </div>
       )}
 
-      {/* Date picker */}
-      <div style={{ margin: '16px 20px', border: '1px solid var(--divider)', padding: '14px 16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-          <Calendar size={14} style={{ color: 'var(--muted)' }} />
-          <span className="k">Data sessione</span>
-        </div>
-        <input
-          type="date"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          className="input"
-        />
-      </div>
+      {tab === 'catalogo' && (
+        <CatalogTab templates={[...customWorkouts, ...workoutTemplates]} />
+      )}
 
-      {/* Le mie schede */}
-      <div style={{ padding: '0 20px 8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <div>
-            <span className="k">Le mie schede</span>
-            <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{customWorkouts.length}/5 schede</div>
-          </div>
-          {customWorkouts.length < 5 && (
-            <button
-              onClick={openCreate}
-              className="btn btn-secondary"
-              style={{ fontSize: 12 }}
-            >
-              <Plus size={13} />
-              Nuova
-            </button>
-          )}
-        </div>
-
-        {customWorkouts.length === 0 ? (
-          <button
-            onClick={openCreate}
-            style={{ width: '100%', border: '1px dashed var(--divider)', padding: '32px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, color: 'var(--muted)', background: 'none', cursor: 'pointer' }}
-          >
-            <Plus size={22} />
-            <span style={{ fontSize: 13 }}>Crea la tua prima scheda personalizzata</span>
-          </button>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {customWorkouts.map((t) => (
-              <TemplateCard
-                key={t.id}
-                template={t}
-                onStart={() => handleStart(t)}
-                onEdit={() => openEdit(t)}
-                onDelete={() => removeCustomWorkout(t.id)}
-                disabled={!!activeSession}
-                onExerciseDemo={setDemoExercise}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Libreria */}
-      <div style={{ padding: '16px 20px 8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-          <span className="k">Libreria allenamenti</span>
-          <Lock size={10} style={{ color: 'var(--muted)' }} />
-        </div>
-        <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 10 }}>Schede predefinite — sola lettura</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {libraryTemplates.map((t) => (
-            <TemplateCard
-              key={t.id}
-              template={t}
-              onStart={() => handleStart(t)}
-              disabled={!!activeSession}
-              onExerciseDemo={setDemoExercise}
+      {tab === 'schede' && (
+        <>
+          {/* Date picker */}
+          <div style={{ margin: '16px 20px', border: '1px solid var(--divider)', padding: '14px 16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <Calendar size={14} style={{ color: 'var(--muted)' }} />
+              <span className="k">Data sessione</span>
+            </div>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="input"
             />
-          ))}
-        </div>
-      </div>
+          </div>
+
+          {/* Le mie schede */}
+          <div style={{ padding: '0 20px 8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <div>
+                <span className="k">Le mie schede</span>
+                <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{customWorkouts.length}/5 schede</div>
+              </div>
+              {customWorkouts.length < 5 && (
+                <button
+                  onClick={openCreate}
+                  className="btn btn-secondary"
+                  style={{ fontSize: 12 }}
+                >
+                  <Plus size={13} />
+                  Nuova
+                </button>
+              )}
+            </div>
+
+            {customWorkouts.length === 0 ? (
+              <button
+                onClick={openCreate}
+                style={{ width: '100%', border: '1px dashed var(--divider)', padding: '32px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, color: 'var(--muted)', background: 'none', cursor: 'pointer' }}
+              >
+                <Plus size={22} />
+                <span style={{ fontSize: 13 }}>Crea la tua prima scheda personalizzata</span>
+              </button>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {customWorkouts.map((t) => (
+                  <TemplateCard
+                    key={t.id}
+                    template={t}
+                    onStart={() => handleStart(t)}
+                    onEdit={() => openEdit(t)}
+                    onDelete={() => removeCustomWorkout(t.id)}
+                    disabled={!!activeSession}
+                    onExerciseDemo={setDemoExercise}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Libreria */}
+          <div style={{ padding: '16px 20px 8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+              <span className="k">Libreria allenamenti</span>
+              <Lock size={10} style={{ color: 'var(--muted)' }} />
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 10 }}>Schede predefinite — sola lettura</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {libraryTemplates.map((t) => (
+                <TemplateCard
+                  key={t.id}
+                  template={t}
+                  onStart={() => handleStart(t)}
+                  disabled={!!activeSession}
+                  onExerciseDemo={setDemoExercise}
+                />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Custom Workout Editor */}
       {editorOpen && (

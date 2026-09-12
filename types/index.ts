@@ -36,6 +36,7 @@ export interface PerformedSet {
   reps: number
   weight: number
   completed: boolean
+  rir?: number
 }
 
 export interface PerformedExercise {
